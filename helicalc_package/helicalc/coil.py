@@ -19,7 +19,7 @@ class CoilIntegrator(object):
         if layer > geom_coil.N_layers:
             raise ValueError(f'Layer "{layer}" invalid. Please select layer in the range [1, {int(geom_coil.N_layers)}]')
         # set correct device
-        tc.cuda.set_device(dev)
+        tc.cuda.set_device(dev) #Uncomment this after testing it out. 
         # check device initial memory
         self.start_dev_mem = get_gpu_memory_map()[dev]
         self.mem_err_expected = False
@@ -155,7 +155,7 @@ class CoilIntegrator(object):
                   self.SINPHI, self.COSPHI]:
             # lazy...but avoids errors when using numpy. FIXME!
             try:
-                sizes.append(getsizeof(o.storage())*1e-6)
+                sizes.append(getsizeof(o.untyped_storage())*1e-6)#storage())*1e-6)
             except:
                 pass
         self.getsizeof_init_mb = np.array(sizes)

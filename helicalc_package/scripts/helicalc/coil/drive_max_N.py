@@ -22,8 +22,9 @@ if __name__=='__main__':
                 append = 'n'
             else:
                 append = 'y'
+                # print("Appending!!!")
             _ = subprocess.run(f'python find_max_N.py -C {row.Coil_Num}'+
-                               f' -L 1 -dxyz {row.dxyz} -D 3'+
+                               f' -L 1 -dxyz {row.dxyz} -D 0'+
                                ' -f Bmaps/aux/batch_N_helicalc_03-16-22.txt'+
                                f' -A {append}', shell=True,
                                capture_output=False)

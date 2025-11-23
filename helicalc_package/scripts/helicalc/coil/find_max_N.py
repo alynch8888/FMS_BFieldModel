@@ -37,19 +37,19 @@ if __name__=='__main__':
     if args.Coil is None:
         args.Coil = 56
     else:
-        args.Coil = int(args.Coil.strip())
+        args.Coil = int(float(args.Coil.strip()))
     if args.Layer is None:
         args.Layer = 1
     else:
-        args.Layer = int(args.Layer.strip())
+        args.Layer = int(float(args.Layer.strip()))
     if args.dxyz is None:
         args.dxyz = 1
     else:
-        args.dxyz = int(args.dxyz.strip())
+        args.dxyz = int(float(args.dxyz.strip()))
     if args.Device is None:
         args.Device = 0
     else:
-        args.Device = int(args.Device.strip())
+        args.Device = int(float(args.Device.strip()))
     if args.Append is None:
         args.Append = False
     else:

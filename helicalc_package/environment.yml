@@ -181,3 +181,4 @@ dependencies:
     - pyqtchart==5.12
     - pyqtwebengine==5.12.1
     - uncertainties==2.4.4
+    - mpldatacursor==0.7.1

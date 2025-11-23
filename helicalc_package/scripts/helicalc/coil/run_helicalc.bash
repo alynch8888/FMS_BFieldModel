@@ -7,11 +7,11 @@ conda activate helicalc
 helicalc_data=$(python ../../get_data_dir.py)
 logdir="${helicalc_data}/Bmaps/helicalc_partial/logs/"
 
-# region="DS"
+region="DS"
 # region="TSd"
 # region="DSCylFMS"
 #region="DSCylFMSAll"
-region="DSCartVal"
+# region="DSCartVal"
 # region="DSCylFMSAll_MetUnc"
 # itoy=$1
 
