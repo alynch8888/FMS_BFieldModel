@@ -184,18 +184,21 @@ def mu2e_plot3d(df, x, y, z, conditions=None, mode='mpl', info=None, save_dir=No
 
 
     # Format the coordinates
-    piv = df.pivot(x, y, z)
+    #piv = df.pivot(x, y, z)
+    piv = df.pivot(index=x, columns=y, values=z) # pandas 2+ breaking change
     X = piv.index.values
     Y = piv.columns.values
     Z = np.transpose(piv.values)
     Xi, Yi = np.meshgrid(X, Y)
     if df_fit:
-        piv_fit = df.pivot(x, y, z+'_fit')
+        #piv_fit = df.pivot(x, y, z+'_fit')
+        piv_fit = df.pivot(index=x, columns=y, values=z+'_fit')
         Z_fit = np.transpose(piv_fit.values)
         if df_fine is None:
             df_fine = df
         df_fine = df_fine.eval(f'{z}_diff={z}-{z}_fit')
-        piv_fine = df_fine.pivot(x, y, z+'_diff')
+        #piv_fine = df_fine.pivot(x, y, z+'_diff')
+        piv_fine = df_fine.pivot(index=x, columns=y, values=z+'_diff')
         data_fit_diff = np.transpose(piv_fine.values)
         X_fine = piv_fine.index.values
         Y_fine = piv_fine.columns.values
@@ -348,15 +351,23 @@ def mu2e_plot3d(df, x, y, z, conditions=None, mode='mpl', info=None, save_dir=No
 
         elif ptype == '3d':
             layout = go.Layout(
-                title=title,
-                titlefont=dict(size=30),
+                #title=title,
+                #titlefont=dict(size=30),
+                title=dict(
+                    text=title,
+                    font=dict(size=30),
+                ),
                 autosize=False,
                 width=width,
                 height=height,
                 scene=dict(
                     xaxis=dict(
-                        title=f'{x} ({units})',
-                        titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        #title=f'{x} ({units})',
+                        #titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        title=dict(
+                            text=f'{x} ({units})',
+                            font=dict(size=axis_title_size, family='Arial Black'),
+                        ),
                         tickfont=dict(size=axis_tick_size),
                         # dtick=400,
                         gridcolor='rgb(255, 255, 255)',
@@ -365,8 +376,12 @@ def mu2e_plot3d(df, x, y, z, conditions=None, mode='mpl', info=None, save_dir=No
                         backgroundcolor='rgb(230, 230,230)',
                     ),
                     yaxis=dict(
-                        title=f'{y} ({units})',
-                        titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        # title=f'{y} ({units})',
+                        # titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        title=dict(
+                            text=f'{y} ({units})',
+                            font=dict(size=axis_title_size, family='Arial Black'),
+                        ),
                         tickfont=dict(size=axis_tick_size),
                         gridcolor='rgb(255, 255, 255)',
                         zerolinecolor='rgb(255, 255, 255)',
@@ -375,8 +390,12 @@ def mu2e_plot3d(df, x, y, z, conditions=None, mode='mpl', info=None, save_dir=No
                     ),
                     zaxis=dict(
                         # title='B (G)',
-                        title='',
-                        titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        #title='',
+                        #titlefont=dict(size=axis_title_size, family='Arial Black'),
+                        title=dict(
+                            text='',
+                            font=dict(size=axis_title_size, family='Arial Black'),
+                        ),
                         tickfont=dict(size=axis_tick_size),
                         gridcolor='rgb(255, 255, 255)',
                         zerolinecolor='rgb(255, 255, 255)',
@@ -461,9 +480,14 @@ def mu2e_plot3d(df, x, y, z, conditions=None, mode='mpl', info=None, save_dir=No
             if ptype == '3d':
                 surface = go.Surface(
                     x=Xi, y=Yi, z=Z,
-                    colorbar=go.ColorBar(title='Gauss',
-                                         titleside='right',
-                                         titlefont=dict(size=25),
+                    colorbar=go.surface.ColorBar(
+                                         #title='Gauss',
+                                         #titleside='right', # deprecated
+                                         #titlefont=dict(size=25),
+                                         title=dict(text='Gauss',
+                                                    font=dict(size=25),
+                                                    side='right',
+                                                    ),
                                          tickfont=dict(size=18),
                                          ),
                     colorscale='Viridis')
@@ -602,13 +626,20 @@ def mu2e_plot3d_nonuniform_test(df, x, y, z, conditions=None, mode='mpl', info=N
     # However since this is a 'histogram', set SP Z values equal to closest BP Z
     if df_fine is None:
         df_fine = df
-        df_fine.loc[np.array(df_fine['HP'].str.contains('SP')),'Z'] -= 0.015
+        # 5 cm z steps
+        #df_fine.loc[np.array(df_fine['HP'].str.contains('SP')),'Z'] -= 0.015
+        # 10 cm z steps
+        df_fine.loc[np.array(df_fine['HP'].str.contains('SP')),'Z'] += 0.035
         df_fine = df_fine.round({'Z':3})
 
     df_fine = df_fine.eval(f'{z}_diff={z}-{z}_fit')
-    piv_fine = df_fine.pivot_table(z+'_diff',x,y)
+    #piv_fine = df_fine.pivot_table(z+'_diff',x,y)
+    piv_fine = df_fine.pivot_table(index=z+'_diff', columns=x, values=y)
     X_fine = piv_fine.index.values
     Y_fine = piv_fine.columns.values
+    # DEBUG
+    # print(f'X_fine={X_fine}')
+    # print(f'Y_fine={Y_fine}')
     dZ = np.transpose(piv_fine.values)
     Xa = np.concatenate(([X_fine[0]], 0.5*(X_fine[1:]+X_fine[:-1]), [X_fine[-1]]))
     Ya = np.concatenate(([Y_fine[0]], 0.5*(Y_fine[1:]+Y_fine[:-1]), [Y_fine[-1]]))

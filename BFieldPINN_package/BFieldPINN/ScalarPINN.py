@@ -77,7 +77,7 @@ class ScalarPINN(tf.keras.Model):
             else:
                 kernel_reg = tf.keras.regularizers.L1(self.reg)
             self.PINN_layers.append(tf.keras.layers.Dense(layers_in[i], activation = activation_func, kernel_regularizer = kernel_reg, trainable = True,
-                                                          kernel_initializer=initializer[0], bias_initializer=initializer[1]))
+                                                          kernel_initializer=self.initializer[0], bias_initializer=self.initializer[1]))
         self.PINN_layers.append(tf.keras.layers.Dense(layers_in[-1], activation = None, trainable = True))
         self(tf.concat([self.x_u, self.y_u, self.z_u], axis = 1))
 

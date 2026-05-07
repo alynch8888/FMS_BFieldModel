@@ -7,6 +7,9 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 from datetime import datetime
 from mu2e.mu2eplots import mu2e_plot3d_nonuniform_test
 
+from BFieldPINN.tools import wb_dict_to_flat_np
+
+
 mono_font = plt.rcParams['font.monospace'][0]
 
 ### check plotdir
@@ -223,7 +226,10 @@ def make_Bi_residual_1D_hist(df, bin_orig=True, nbins=200, title_suff=' (Test Da
         # residual = B - model = B - (B_fit + dB_NN)
         res1 = (df[f'B{i}'] - (df[f'B{i}_fit'])).values
         res2 = (df[f'B{i}'] - (df[f'B{i}_fit'] + df[f'dB{i}_NN'])).values
-        res3 = (df[f'B{i}'] - (df[f'B{i}_fit_full'])).values
+        try:
+            res3 = (df[f'B{i}'] - (df[f'B{i}_fit_full'])).values
+        except:
+            res3 = None
         if bin_orig:
             vals = res1
         else:
@@ -239,16 +245,22 @@ def make_Bi_residual_1D_hist(df, bin_orig=True, nbins=200, title_suff=' (Test Da
         n_NN, _, _ = ax.hist(res2, bins=bins, histtype='bar', linewidth=0.0,
                              color='blue', edgecolor='black', alpha=0.7,
                              label='PINN Training\n'+get_label(res2, bins), zorder=10)
-        n_refit, _, _ = ax.hist(res3, bins=bins, histtype='step', linewidth=1.75,
-                             color='limegreen', hatch='/', alpha=1.0,
-                             label='LSQ Refit\n'+get_label(res3, bins), zorder=11)
+        if not res3 is None:
+            n_refit, _, _ = ax.hist(res3, bins=bins, histtype='step', linewidth=1.75,
+                                 color='limegreen', hatch='/', alpha=1.0,
+                                 label='LSQ Refit\n'+get_label(res3, bins), zorder=11)
+        else:
+            n_refit = None
         #_, _, _ = ax.hist(res2, bins=bins, histtype='step', linewidth=2.0,
         #                     color='darkblue', zorder=11)
 
         # add noise model?
         if add_noise_model:
             if noise_on_final:
-                n_ = n_refit
+                if not n_refit is None:
+                    n_ = n_refit
+                else:
+                    n_ = n_NN
             else:
                 n_ = n
             integral = n_.sum() * (bins[1]-bins[0])
@@ -506,4 +518,63 @@ def make_mu2e_plot3d(df_meas, steps=[0.0, np.pi/2], steps_nice=[r'0', r'\pi/2'],
             fig_dict[step_str] = {'fig': fig, 'axs': axs}
     return fig_dict
 
+def make_weights_and_biases_plot(wb_dict_init, wb_dict_trained, Nbins_w=500, Nbins_b=50, ylim_bias=True, title=None, make_title=True, plotdir=None, model_num='1'):
+    # flatten weights and biases
+    w_i, b_i = wb_dict_to_flat_np(wb_dict_init)
+    w_t, b_t = wb_dict_to_flat_np(wb_dict_trained)
+    w = np.concatenate([w_i, w_t])
+    b = np.concatenate([b_i, b_t])
+    # calculate binning and range
+    #wmax = np.round(np.max(np.abs(w)), decimals=1)
+    #bmax = np.round(np.max(np.abs(b)), decimals=1)
+    wmax = np.round(np.max(np.abs(w)), decimals=2)
+    bmax = np.round(np.max(np.abs(b)), decimals=2)
+    wb_max = np.round(np.max(np.abs(np.concatenate([w, b]))), decimals=1)
 
+    #bins_w = np.linspace(-wmax, wmax, Nbins_w)
+    #bins_b = np.linspace(-bmax, bmax, Nbins_b)
+    bins_w = np.linspace(-wmax-0.01, wmax+0.01, Nbins_w)
+    bins_b = np.linspace(-bmax-0.01, bmax+0.01, Nbins_b)
+
+    # make plot
+    fig, axs = plt.subplots(2, 1, figsize=(12, 12), gridspec_kw={'height_ratios': [1, 1]},
+                            layout='constrained', sharex=True)
+    density=False
+    #density=True
+    #axs[0].hist(w_i, bins=bins_w, histtype='step', color='blue', density=density, label='Initialization:\n'+get_label(w_i, bins=bins_w))
+    axs[0].hist(w_i, bins=bins_w, histtype='bar', color='gray', alpha=0.6, density=density, label='Initialization:\n'+get_label(w_i, bins=bins_w), zorder=4)
+    axs[0].hist(w_t, bins=bins_w, histtype='step', color='green', density=density, label='Trained:\n'+get_label(w_t, bins=bins_w), zorder=5)
+    # axs[1].hist(b_i, bins=bins_b, histtype='step', color='blue', density=density, label='Initialization:\n'+get_label(b_i, bins=bins_b))
+    nbi, _, _ = axs[1].hist(b_i, bins=bins_b, histtype='bar', color='gray', alpha=0.6, density=density, label='Initialization:\n'+get_label(b_i, bins=bins_b), zorder=4)
+    nbf, _, _ = axs[1].hist(b_t, bins=bins_b, histtype='step', color='green', density=density, label='Trained:\n'+get_label(b_t, bins=bins_b), zorder=5)
+
+    axs[0].set_xlabel('Weights')
+    axs[1].set_xlabel('Biases')
+
+    L = axs[0].legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
+    plt.setp(L.texts, family=mono_font)
+    L = axs[1].legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
+    plt.setp(L.texts, family=mono_font)
+
+    #axs[0].set_xlim([-wb_max, wb_max])
+    axs[0].set_xlim([-wb_max-0.01, wb_max+0.01])
+
+    if ylim_bias:
+        max_b = 1.2 * np.max(nbf)
+        axs[1].set_ylim([0.9, max_b])
+
+    if (not title is None) and (make_title):
+        axs[0].set_title(title)
+
+    # save and return
+    # savefig, 1 linear y, 2 log y
+    if not plotdir is None:
+        for yscale, scale_lab in zip(['log', 'linear'], ['_logy', '']):
+            for ax in axs:
+                ax.set_yscale(yscale)
+            plotname = f'wb_plot{scale_lab}'
+            fname = os.path.join(plotdir, model_num+'_'+plotname)
+            fig.savefig(fname+'.pdf', bbox_inches='tight', pad_inches=0.25)
+            fig.savefig(fname+'.png', bbox_inches='tight', pad_inches=0.25)
+    fig_dict = {'fig': fig, 'axs': axs}
+    return fig_dict

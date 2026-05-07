@@ -64,13 +64,72 @@ def model_predict_with_jacobian(PINN_inst, x, y, z, N_i=100000):
     return pred_test, jac_test
 
 # snake function register
+# missing 1/a factor
+'''
 def register_x_sin2x_func(a=1):
+    #var_a = 1. + (1.+np.exp(-8.*a**2)-2.*np.exp(-4.*a**2))/(8.*a**2)
+    #sigma_a = var_a**(1/2)
     K = tf.keras.backend
     def x_sin2x(x):
-        return x + K.square(K.sin(a*x))
+        return x + K.square(K.sin(a*x)) # MISSING 1/a
+        #return x + K.square(K.sin(a*x)) / a # no variance correction
+        #return (x + K.square(K.sin(a*x)) / a) / sigma_a # with variance correction
     activ_name = f'x_sin2x_a{a:0.1f}'
     tf.keras.utils.get_custom_objects().update({activ_name: tf.keras.layers.Activation(x_sin2x)})
     return activ_name
+'''
+
+# smarter modification: f(x) = C x + D sin^2 a
+def register_x_sin2x_func(a=1):
+    #f = 1./3. # both tests -- matches old case when a=2
+    f = 1./2. # both tests -- close to old case when a=5
+    #f = 0.1
+    # f = 0.0 # original snake
+    # D = 1./a # original snake
+    D = 1 # test 2 (1_28)
+    # D = 2 # TEMP
+    C = D * a * (1 - f) / (1 + f)
+    ###
+    #var_a = 1. + (1.+np.exp(-8.*a**2)-2.*np.exp(-4.*a**2))/(8.*a**2)
+    #sigma_a = var_a**(1/2)
+    K = tf.keras.backend
+    def x_sin2x(x):
+        #return x + K.square(K.sin(a*x)) # MISSING 1/a
+        return C * x + D * K.square(K.sin(a*x)) # MISSING 1/a, modified
+        #return x + K.square(K.sin(a*x)) / a # no variance correction
+        #return (x + K.square(K.sin(a*x)) / a) / sigma_a # with variance correction
+    activ_name = f'x_sin2x_a{a:0.1f}'
+    tf.keras.utils.get_custom_objects().update({activ_name: tf.keras.layers.Activation(x_sin2x)})
+    return activ_name
+
+# modified missing 1/a to be monotonic
+# BAD
+# def register_x_sin2x_func(a=1):
+#     #var_a = 1. + (1.+np.exp(-8.*a**2)-2.*np.exp(-4.*a**2))/(8.*a**2)
+#     #sigma_a = var_a**(1/2)
+#     K = tf.keras.backend
+#     def x_sin2x(x):
+#         return a * x + K.square(K.sin(a*x)) # MISSING 1/a
+#         #return x + K.square(K.sin(a*x)) / a # no variance correction
+#         #return (x + K.square(K.sin(a*x)) / a) / sigma_a # with variance correction
+#     activ_name = f'x_sin2x_a{a:0.1f}'
+#     tf.keras.utils.get_custom_objects().update({activ_name: tf.keras.layers.Activation(x_sin2x)})
+#     return activ_name
+
+# with correct 1/a factor
+'''
+def register_x_sin2x_func(a=1):
+    var_a = 1. + (1.+np.exp(-8.*a**2)-2.*np.exp(-4.*a**2))/(8.*a**2)
+    sigma_a = var_a**(1/2)
+    K = tf.keras.backend
+    def x_sin2x(x):
+        #return x + K.square(K.sin(a*x)) # MISSING 1/a
+        #return x + K.square(K.sin(a*x)) / a # no variance correction
+        return (x + K.square(K.sin(a*x)) / a) / sigma_a # with variance correction
+    activ_name = f'x_sin2x_a{a:0.1f}'
+    tf.keras.utils.get_custom_objects().update({activ_name: tf.keras.layers.Activation(x_sin2x)})
+    return activ_name
+'''
 
 class PredictionTrack(tf.keras.callbacks.Callback):
     def __init__(self, model):

@@ -235,9 +235,35 @@ class FieldFitter:
                 pvd['pitch2'], pvd['ms_h2'], pvd['ns_h2'],
                 pvd['length1'], pvd['ms_c1'], pvd['ns_c1'],
                 pvd['length2'], pvd['ms_c2'], pvd['ns_c2'],
+                pvd['z0'],
                 self.bz_calc_data, self.br_calc_data, self.bphi_calc_data)
         elif func_version == 1006:
             self.fit_func = ff.brzphi_3d_producer_giant_function_v1006(
+                self.ZZ, self.RR, self.PP,
+                pvd['pitch1'], pvd['ms_h1'], pvd['ns_h1'],
+                pvd['pitch2'], pvd['ms_h2'], pvd['ns_h2'],
+                pvd['length1'], pvd['ms_c1'], pvd['ns_c1'],
+                pvd['length2'], pvd['ms_c2'], pvd['ns_c2'],
+                self.bz_calc_data, self.br_calc_data, self.bphi_calc_data)
+        elif func_version == 1007:
+            self.fit_func = ff.brzphi_3d_producer_giant_function_v1007(
+                self.ZZ, self.RR, self.PP,
+                pvd['pitch1'], pvd['ms_h1'], pvd['ns_h1'],
+                pvd['pitch2'], pvd['ms_h2'], pvd['ns_h2'],
+                pvd['length1'], pvd['ms_c1'], pvd['ns_c1'],
+                pvd['length2'], pvd['ms_c2'], pvd['ns_c2'],
+                self.bz_calc_data, self.br_calc_data, self.bphi_calc_data)
+        elif func_version == 1008:
+            self.fit_func = ff.brzphi_3d_producer_giant_function_v1008(
+                self.ZZ, self.RR, self.PP,
+                pvd['pitch1'], pvd['ms_h1'], pvd['ns_h1'],
+                pvd['pitch2'], pvd['ms_h2'], pvd['ns_h2'],
+                pvd['length1'], pvd['ms_c1'], pvd['ns_c1'],
+                pvd['length2'], pvd['ms_c2'], pvd['ns_c2'],
+                pvd['z0'],
+                self.bz_calc_data, self.br_calc_data, self.bphi_calc_data)
+        elif func_version == 1009:
+            self.fit_func = ff.brzphi_3d_producer_giant_function_v1009(
                 self.ZZ, self.RR, self.PP,
                 pvd['pitch1'], pvd['ms_h1'], pvd['ns_h1'],
                 pvd['pitch2'], pvd['ms_h2'], pvd['ns_h2'],
@@ -285,10 +311,47 @@ class FieldFitter:
             self.add_params_cart_simple(cfg_params)
             self.add_params_biot_savart(cfg_params, cfg_pickle.recreate)
         # z0 offset, introduction of new k scheme (can control whether each is varied)
-        elif func_version == 1006:
+        #elif func_version == 1006:
+        elif (func_version == 1006):
             self.add_params_hel(1)
             self.add_params_hel(2)
             self.add_params_cyl_v1006(1, AB_lim=cfg_params.AB_lim)
+            self.add_params_cyl(2)
+            self.add_params_cart_simple_fixable(cfg_params)
+            self.add_params_biot_savart(cfg_params, cfg_pickle.recreate)
+            #z0
+            if not cfg_params.z0 is None:
+                self.params.add('z0', value=cfg_params.z0, vary=False)
+            else:
+                self.params.add('z0', value=0.0, vary=False)
+        elif (func_version == 1007):
+            self.add_params_hel(1)
+            self.add_params_hel(2)
+            self.add_params_cyl_v1007(1, AB_lim=cfg_params.AB_lim)
+            self.add_params_cyl(2)
+            self.add_params_cart_simple_fixable(cfg_params)
+            self.add_params_biot_savart(cfg_params, cfg_pickle.recreate)
+            #z0
+            if not cfg_params.z0 is None:
+                self.params.add('z0', value=cfg_params.z0, vary=False)
+            else:
+                self.params.add('z0', value=0.0, vary=False)
+        elif (func_version == 1008):
+            self.add_params_hel(1)
+            self.add_params_hel(2)
+            self.add_params_cyl_v1008(1, AB_lim=cfg_params.AB_lim)
+            self.add_params_cyl(2)
+            self.add_params_cart_simple_fixable(cfg_params)
+            self.add_params_biot_savart(cfg_params, cfg_pickle.recreate)
+            #z0
+            if not cfg_params.z0 is None:
+                self.params.add('z0', value=cfg_params.z0, vary=False)
+            else:
+                self.params.add('z0', value=0.0, vary=False)
+        elif (func_version == 1009):
+            self.add_params_hel(1)
+            self.add_params_hel(2)
+            self.add_params_cyl_v1009(1, AB_lim=cfg_params.AB_lim)
             self.add_params_cyl(2)
             self.add_params_cart_simple_fixable(cfg_params)
             self.add_params_biot_savart(cfg_params, cfg_pickle.recreate)
@@ -356,7 +419,8 @@ class FieldFitter:
         else:
             print_status = FitStatus(1000)
             # mag = 1/np.sqrt(Br**2+Bz**2+Bphi**2)
-            if cfg_params.method == 'leastsq' or cfg_params.method == 'brute':
+            #if cfg_params.method == 'leastsq' or cfg_params.method == 'brute':
+            if cfg_params.method != 'least_squares':
                 self.result = self.mod.fit(np.concatenate([self.Br, self.Bz, self.Bphi]).ravel(),
                                            weights=weights, scale_covar=False,
                                            r=self.RR, z=self.ZZ, phi=self.PP, x=self.XX, y=self.YY, params=self.params,
@@ -367,10 +431,20 @@ class FieldFitter:
                                            weights=weights, scale_covar=False,
                                            r=self.RR, z=self.ZZ, phi=self.PP, x=self.XX, y=self.YY, params=self.params,
                                            method='least_squares', iter_cb=print_status, fit_kws={'verbose': 1,
+                                                                                                  # original
                                                                                                   'gtol': 1e-8,
                                                                                                   'ftol': 1e-8,
-                                                                                                  'xtol': None,
+                                                                                                  #'xtol': None,
+                                                                                                  # testing
+                                                                                                  # 'gtol': 1e-6,
+                                                                                                  # 'ftol': 1e-6,
+                                                                                                  # 'xtol': 1e-6,
+                                                                                                  'xtol': 1e-8,
                                                                                                   'loss': cfg_params.loss,
+                                                                                                  'jac': '2-point', # default, faster
+                                                                                                  #'jac': '3-point', # more accurate, slower
+                                                                                                  #'x_scale': 'jac', # default is None -- how to scale each free param
+                                                                                                  #'diff_step': 1e-6*np.ones_like(self.params.keys()), # default is some optimal value based on machine epsilon
                                            })
             else:
                 print('Error, only supported methods are leastsq and least_squares')
@@ -525,6 +599,19 @@ class FieldFitter:
             self.params.add('ms_asym_max', value=cfg_params.ms_asym_max, vary=False)
         else:
             self.params['ms_asym_max'].value = cfg_params.ms_asym_max
+        # z0
+        if 'z0' not in self.params:
+            if cfg_params.z0 is None:
+                z0_ = 0.
+            else:
+                z0_ = cfg_params.z0
+            self.params.add('z0', value=z0_, vary=False)
+        else:
+            if cfg_params.z0 is None:
+                z0_ = 0.
+            else:
+                z0_ = cfg_params.z0
+            self.params['z0'].value = z0_
 
     def add_params_hel(self, num):
         ms_range = range(self.params[f'ms_h{num}'].value)
@@ -572,6 +659,252 @@ class FieldFitter:
                         self.params.add(f'Dh{num}_{m}_{n}', value=0, vary=False)
                     else:
                         self.params[f'Dh{num}_{m}_{n}'].vary = False
+
+    def add_params_cyl_v1009(self, num, AB_lim=None):
+        ms_range = range(self.params[f'ms_c{num}'].value)
+        ns_range = range(self.params[f'ns_c{num}'].value)
+        #np.random.seed(0)
+        m_max = self.params['ms_asym_max'].value
+        if m_max < 0:
+            m_max = np.inf
+
+        # limits on A/B?
+        if AB_lim is None:
+            AB_min = None
+            AB_max = None
+        else:
+            AB_min = -AB_lim
+            AB_max = AB_lim
+
+        # cos like terms
+        '''
+        cosmax = 1.
+        cosmin = -1.
+
+        for m in ms_range:
+            for n in ns_range:
+                #if (m > m_max) & (n > 0):
+                if (m > m_max) & (n > 1): # good for: m=50, n=5, m_asym_max = 10
+                # if (m > m_max) & (n > 2): # can't find a good result
+                    var = False
+                    val0 = 0.
+                    val1 = 0.
+                    val2 = 0.
+                else:
+                    var = True
+                    val0 = 10.+ m * (-1.)**m / m_max
+                    val1 = 0.
+                    val2 = 10.+ m * (-1.)**(m+1)/ m_max
+                # N (normalization) and cos_alpha_m_n, cos_beta_m_n to control phase
+                # or: N, M normalizations, cos_alpha_m_n phase
+                if f'N_{m}_{n}' not in self.params:
+                    #self.params.add(f'N_{m}_{n}', value=val0, vary=var, min=AB_min, max=AB_max)
+                    self.params.add(f'N_{m}_{n}', value=val0, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'N_{m}_{n}'].vary = var
+                # M normalization
+                # if f'M_{m}_{n}' not in self.params:
+                #     self.params.add(f'M_{m}_{n}', value=val2, vary=var, min=AB_min, max=AB_max)
+                # else:
+                #     self.params[f'M_{m}_{n}'].vary = var
+                if f'cos_alpha_{m}_{n}' not in self.params:
+                    self.params.add(f'cos_alpha_{m}_{n}', value=val1, vary=var, min=cosmin, max=cosmax)
+                else:
+                    self.params[f'cos_alpha_{m}_{n}'].vary = var
+                if f'cos_beta_{m}_{n}' not in self.params:
+                   self.params.add(f'cos_beta_{m}_{n}', value=val1, vary=var, min=cosmin, max=cosmax)
+                else:
+                   self.params[f'cos_beta_{m}_{n}'].vary = var
+                # n = 0, fixed C and D -- can achieve by fixing cos_beta_m_n to 1.
+                if n == 0:
+                   self.params[f'cos_beta_{m}_{n}'].value = 1.0
+                   self.params[f'cos_beta_{m}_{n}'].vary = False
+                # if n == 0:
+                #    self.params[f'M_{m}_{n}'].value = 0.0
+                #    self.params[f'M_{m}_{n}'].vary = False
+                #    self.params[f'cos_beta_{m}_{n}'].value = 1.0
+                #    self.params[f'cos_beta_{m}_{n}'].vary = False
+        '''
+        # single normalization, 3 + 1 constrained
+        max_bcd = 3.**(-1/2)
+        cosmax = 1. * max_bcd
+        cosmin = -1. * max_bcd
+
+        for m in ms_range:
+            for n in ns_range:
+                #if (m > m_max) & (n > 0):
+                if (m > m_max) & (n > 1): # good for: m=50, n=5, m_asym_max = 10
+                # if (m > m_max) & (n > 2): # can't find a good result
+                    var = False
+                    val0 = 0.
+                    val1 = 0.
+                    val2 = 0.
+                else:
+                    var = True
+                    val0 = 10.+ m * (-1.)**m / m_max
+                    val1 = 0.5 # equal contributions from each, to start
+                    val2 = 0.5
+                # N (normalization) and cos_alpha_m_n, cos_beta_m_n to control phase
+                # or: N, M normalizations, cos_alpha_m_n phase
+                if f'N_{m}_{n}' not in self.params:
+                    #self.params.add(f'N_{m}_{n}', value=val0, vary=var, min=AB_min, max=AB_max)
+                    self.params.add(f'N_{m}_{n}', value=val0, vary=var, min=0., max=AB_max)
+                else:
+                    self.params[f'N_{m}_{n}'].vary = var
+                if f'b_{m}_{n}' not in self.params:
+                    self.params.add(f'b_{m}_{n}', value=val1, vary=var, min=cosmin, max=cosmax)
+                else:
+                    self.params[f'b_{m}_{n}'].vary = var
+                if f'c_{m}_{n}' not in self.params:
+                    self.params.add(f'c_{m}_{n}', value=val1, vary=var, min=cosmin, max=cosmax)
+                else:
+                    self.params[f'c_{m}_{n}'].vary = var
+                if f'd_{m}_{n}' not in self.params:
+                    self.params.add(f'd_{m}_{n}', value=val1, vary=var, min=cosmin, max=cosmax)
+                else:
+                    self.params[f'd_{m}_{n}'].vary = var
+                # sign of A parameter
+                if f'lam_a_{m}_{n}' not in self.params:
+                    self.params.add(f'lam_a_{m}_{n}', value=val2, vary=var, min=-2, max=2)
+                else:
+                    self.params[f'lam_a_{m}_{n}'].vary = var
+                # n = 0, fixed C and D -- can achieve by fixing c=d=0.
+                if n == 0:
+                   self.params[f'c_{m}_{n}'].value = 0.0
+                   self.params[f'c_{m}_{n}'].vary = False
+                   self.params[f'd_{m}_{n}'].value = 0.0
+                   self.params[f'd_{m}_{n}'].vary = False
+                # if n == 0:
+                #    self.params[f'M_{m}_{n}'].value = 0.0
+                #    self.params[f'M_{m}_{n}'].vary = False
+                #    self.params[f'cos_beta_{m}_{n}'].value = 1.0
+                #    self.params[f'cos_beta_{m}_{n}'].vary = False
+
+
+    def add_params_cyl_v1008(self, num, AB_lim=None):
+        ms_range = range(self.params[f'ms_c{num}'].value)
+        ns_range = range(self.params[f'ns_c{num}'].value)
+        #np.random.seed(0)
+        m_max = self.params['ms_asym_max'].value
+        if len(ms_range) > 0:
+            m_f = ms_range[-1]
+        if m_max < 0:
+            m_max = np.inf
+
+        # limits on A/B?
+        if AB_lim is None:
+            AB_min = None
+            AB_max = None
+        else:
+            AB_min = -AB_lim
+            AB_max = AB_lim
+
+        for m in ms_range:
+            for n in ns_range:
+                if (m > m_max) & (n > 0):
+                # if (m > m_max) & (n > 1): # good for: m=50, n=5, m_asym_max = 10
+                # if (m > m_max) & (n > 2): # can't find a good result
+                    var = False
+                    val0 = 0.
+                    val1 = 0.
+                else:
+                    var = True
+                    #val0 = 10. + m*(-1.)**m / m_f
+                    #val1 = 10. + m*(-1.)**(m+1) / m_f
+                    val0 = 100 * (-1. + m/m_f)*(-1.)**m
+                    val1 = -100 * (-1. + m/m_f)*(-1.)**m
+                    #print(f'm={m}, n={n}: val0={val0}, val1={val1}')
+                    # val0 = 0.
+                    # val1 = 0.
+                # A, B, C, D are linear
+                if f'Ac{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Ac{num}_{m}_{n}', value=val0, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'Ac{num}_{m}_{n}'].vary = var
+                if f'Bc{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Bc{num}_{m}_{n}', value=val1, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'Bc{num}_{m}_{n}'].vary = var
+                if f'Cc{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Cc{num}_{m}_{n}', value=val0, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'Cc{num}_{m}_{n}'].vary = var
+                if f'Dc{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Dc{num}_{m}_{n}', value=val1, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'Dc{num}_{m}_{n}'].vary = var
+                # n = 0, fixed for C and D
+                if n == 0:
+                    self.params[f'Cc{num}_{m}_{n}'].value = 0.0
+                    self.params[f'Dc{num}_{m}_{n}'].value = 0.0
+                    self.params[f'Cc{num}_{m}_{n}'].vary = False
+                    self.params[f'Dc{num}_{m}_{n}'].vary = False
+
+    def add_params_cyl_v1007(self, num, AB_lim=None):
+        ms_range = range(self.params[f'ms_c{num}'].value)
+        ns_range = range(self.params[f'ns_c{num}'].value)
+        #np.random.seed(0)
+        m_max = self.params['ms_asym_max'].value
+        if m_max < 0:
+            m_max = np.inf
+
+        # limits on A/B?
+        if AB_lim is None:
+            AB_min = None
+            AB_max = None
+        else:
+            AB_min = -AB_lim
+            AB_max = AB_lim
+
+        for m in ms_range:
+            for n in ns_range:
+                if (m > m_max) & (n > 0):
+                    var = False
+                    phase0 = np.pi/2. # constant cos
+                else:
+                    var = True
+                    phase0 = np.pi/4.
+                # A and B are linear
+                if f'Ac{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Ac{num}_{m}_{n}', value=0.0, vary=var, min=AB_min, max=AB_max)
+                    # self.params.add(f'Ac{num}_{m}_{n}', value=10.0, vary=var, min=AB_min, max=AB_max)
+                else:
+                    self.params[f'Ac{num}_{m}_{n}'].vary = var
+                # if f'Bc{num}' not in self.params:
+                #if f'Bc{num}_{m}' not in self.params:
+                if f'Bc{num}_{m}_{n}' not in self.params:
+                    self.params.add(f'Bc{num}_{m}_{n}', value=phase0, vary=var, min=0.0, max=2.*np.pi)
+                    # self.params.add(f'Bc{num}_{m}_{n}', value=phase0, vary=var, min=-np.pi/8., max=2.*np.pi)
+                    # self.params.add(f'Bc{num}_{m}', value=phase0, vary=var, min=-np.pi/8., max=2.*np.pi)
+                    # self.params.add(f'Bc{num}', value=phase0, vary=var, min=-np.pi/8., max=2.*np.pi)
+                else:
+                    self.params[f'Bc{num}_{m}_{n}'].vary = var
+                    #self.params[f'Bc{num}_{m}'].vary = var
+                    # self.params[f'Bc{num}'].vary = True
+                # D is the phi phase
+                # if f'Dc{num}' not in self.params:
+                if f'Dc{num}_{n}' not in self.params:
+                #if f'Dc{num}_{m}_{n}' not in self.params:
+                    if n > 0:
+                        #self.params.add(f'Dc{num}_{m}_{n}', value=phase0, min=0, max=np.pi, vary=var)
+                        #self.params.add(f'Dc{num}_{m}_{n}', value=phase0, min=-np.pi/8., max=np.pi, vary=var)
+                        self.params.add(f'Dc{num}_{n}', value=phase0, min=0.0, max=np.pi, vary=var)
+                        # self.params.add(f'Dc{num}_{n}', value=phase0, min=-np.pi/8., max=np.pi, vary=var)
+                        # self.params.add(f'Dc{num}', value=phase0, min=-np.pi/8., max=np.pi, vary=var)
+                    # n=0 is constant term, no phase
+                    else:
+                        #self.params.add(f'Dc{num}_{m}_{n}', value=np.pi/2, vary=False)
+                        self.params.add(f'Dc{num}_{n}', value=np.pi/2, vary=False)
+                        # self.params.add(f'Dc{num}', value=phase0, min=-np.pi/8., max=np.pi, vary=var)
+                elif n > 0:
+                    #self.params[f'Dc{num}_{m}_{n}'].min = 0.0
+                    #self.params[f'Dc{num}_{m}_{n}'].min = -np.pi/8.
+                    #self.params[f'Dc{num}_{m}_{n}'].max = np.pi
+                    # self.params[f'Dc{num}_{n}'].min = -np.pi/8.
+                    self.params[f'Dc{num}_{n}'].min = 0.0
+                    self.params[f'Dc{num}_{n}'].max = np.pi
+                    # self.params[f'Dc{num}'].min = -np.pi/8.
+                    # self.params[f'Dc{num}'].max = np.pi
 
     def add_params_cyl_v1006(self, num, AB_lim=None):
         ms_range = range(self.params[f'ms_c{num}'].value)

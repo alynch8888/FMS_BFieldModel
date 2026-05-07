@@ -171,7 +171,8 @@ def prep_PINN_inputs(files_dict, NN_dict):
         lim = NN_dict['initializer_lim']
         seed = NN_dict['initializer_seed']
         initializer_w = tf.keras.initializers.RandomUniform(minval=-lim, maxval=lim, seed=seed)
-        initializer_b = tf.keras.initializers.RandomUniform(minval=-lim, maxval=lim, seed=seed)
+        #initializer_b = tf.keras.initializers.RandomUniform(minval=-lim, maxval=lim, seed=seed)
+        initializer_b = 'zeros'
         initializer = [initializer_w, initializer_b]
     else:
         # nothing else implemented
@@ -321,3 +322,29 @@ def div_and_curl_calculations(df, Bcols=['dBx', 'dBy', 'dBz'], Gauss_to_T=False,
     df_nom.loc[:, 'curlB_y'] = curl_vec[:, 1]
     df_nom.loc[:, 'curlB_z'] = curl_vec[:, 2]
     return df_nom, J
+
+# storing weights and biases
+def make_wb_dict(NN_inst):
+    weights_raw = []
+    biases_raw = []
+    for i in range(len(NN_inst.layers)):
+        l = NN_inst.get_layer(index=i)
+        w, b = l.get_weights()
+        weights_raw.append(w)
+        biases_raw.append(b)
+    wb_dict = {
+        'weights': weights_raw,
+        'biases': biases_raw,
+    }
+    return wb_dict
+
+def wb_dict_to_flat_np(wb_dict):
+    weights = []
+    biases = []
+    for w in wb_dict['weights']:
+        weights.append(w.flatten())
+    for b in wb_dict['biases']:
+        biases.append(b.flatten())
+    weights = np.concatenate(weights)
+    biases = np.concatenate(biases)
+    return weights, biases
