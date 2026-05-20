@@ -9,8 +9,8 @@ from dash import dcc
 from dash import html
 from dash import ctx
 from dash.dependencies import Input, Output, State
-import dash_table
-from dash_table.Format import Format, Scheme
+from dash import dash_table#import dash_table
+from dash.dash_table.Format import Format, Scheme
 
 # SolCalc
 from helicalc import helicalc_dir, helicalc_data
