@@ -1,0 +1,57 @@
+# import pickle
+# import pandas as pd
+# import os
+
+# ##Create Some Definitions##
+# def pkl_2_txt(pkl_file):
+#     with open('pkl_file', 'rb') as f:
+#         data = pickle.load(f)
+#     print(data)
+
+
+# def store_pkl_2_txt(pkl_file):
+#     with open('pkl_file', 'rb') as f:
+#         data = pickle.load(f)
+
+#     # txt_file = pkl_file.replace(".pkl", ".txt")
+
+#     with open (txt_file, 'x') as f:
+#         f.write(str(data))
+
+
+
+# with open(DSMap_pkl, "rb") as f:
+#     data = pickle.load(f)
+
+# # print(type(data))
+# # print(data)
+
+
+# # ##Test Create DS+PS Map##
+# # result = None
+# # def load_pkl(filepath):
+# #   with open(filepath, "rb") as f:
+# #     return pickle.load(f)
+# # output_path = os.path.join(data_path, "DS+PS_Map.pkl")
+# # for fname in data_pkl_array:
+# #   fpath = os.path.join(data_path, fname)
+# #   df = load_pkl(fpath)
+# #   result = df if result is None else result.add(df)
+
+# # with open(output_path, "wb") as f:
+# #   pickle.dump(result, f)
+# # print(f"Saved to {output_path}")
+
+# ##DS+PS Did not work, need to fix the ##
+# # df1 = load_pkl(os.path.join(data_path, Data_file[0]))
+# # df2 = load_pkl(os.path.join(data_path, Data_file[1]))
+
+# print(df1.head())
+# print(df1.columns.tolist())
+# print(df1.shape)
+
+# print(df2.head())
+# print(df2.columns.tolist())
+# print(df2.shape)
+
+# print(Data_file)

@@ -1,0 +1,60 @@
+z_coord = cvmfs_coord[:,2]
+# print(cvmfs_coord)
+# print(z_coord)
+
+linthresh2 = 1e-10
+pos_bins = np.logspace(np.log10(linthresh2), np.log10(1e-3), 25)
+neg_bins = -pos_bins[::-1]
+bins = np.concatenate([neg_bins, pos_bins])
+
+z_ranges = [(i * 1e3, (i + 1) * 1e3) for i in range(3, 17)] # In mm!
+colors = ["steelblue", "darkorange", "seagreen"]
+labels = [r"$\Delta B_x(G)$", r"$\Delta B_y(G)$", r"$\Delta B_z(G)$"]
+# print(z_ranges[0][0])
+# mask1 = (z_coord >= z_ranges[0][0]) & (z_coord < z_ranges[0][1])
+# mask2 = (z_coord >= z_ranges[1][0]) & (z_coord < z_ranges[1][1])
+# mask3 = (z_coord >= z_ranges[2][0]) & (z_coord < z_ranges[2][1])
+# print(mask1)
+
+# print(field_diff[mask1])
+# print("Field Difference Mask1")
+# # print(mask1)
+# print(field_diff[mask1])
+# print("Field Difference Mask2")
+# print(field_diff[mask2])
+# print("Field Difference Mask3")
+# print(field_diff[mask3])
+
+fig, axes = plt.subplots(len(z_ranges), 3, figsize=(15, 4 * len(z_ranges)))
+
+for row, (lo, hi) in enumerate(z_ranges):
+    mask = (z_coord >= lo) & (z_coord < hi)
+    fd_slice = field_diff[mask]
+
+    for col in range(3):
+        ax = axes[row, col]
+        data_col = fd_slice[:, col]
+
+        if data_col.size == 0:
+            continue
+
+        ax.hist(data_col, bins=50, edgecolor="black",
+                 color=colors[col], alpha=1, label=labels[col])
+        # ax.set_xscale("symlog", linthresh=1e-5)
+        ax.set_yscale("symlog")
+        # ax.set_xticks([-1e-1,-1, 0, 1,1e-1])
+        ax.tick_params(axis='x', rotation=45)
+        ax.set_xlabel(labels[col])
+        ax.set_xlim(data_col.min(), data_col.max())
+        ax.set_title(f"{labels[col]}, z: {lo:.0f}-{hi:.0f}mm")
+        ax.legend()
+
+    axes[row, 0].set_ylabel("Count")
+#Tracker region Z-range: 8540mm - 1181mm
+# fig.suptitle(x=0,y=0)
+meter_split_title = "My Data - CVMFS Data"+ "\n" + f"{today}"
+# r"$\frac{\mathrm{My\ Data} - \mathrm{CVMFS\ Data}}{\mathrm{CVMFS\ Data}}$"+"\n"+"\n"+"Date made: "+f"{today}"
+fig.suptitle(meter_split_title, fontsize=16, y=1.0)
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.tight_layout()
+plt.show()

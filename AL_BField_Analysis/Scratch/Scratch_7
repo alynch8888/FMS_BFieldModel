@@ -1,0 +1,28 @@
+# if __name__=='__main__':
+#     # parse command line arguments
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('-xs', '--XShift',
+#                         help='How much do you want to shift the x- '+
+#                         '["DS"(default), "TSd", "DSCylFMS", "DSCylFMSAll", "DSCylFine"]')
+#     parser.add_argument('-C', '--Conductor',
+#                         help='Conductor number [12, 25-67], default is 12 '+
+#                         '(from Gap DS7-8 to over DS-2).')
+#     parser.add_argument('-D', '--Device',
+#                         help='Which GPU to use? [0 (default), 1, 2, 3].')
+#     parser.add_argument('-j', '--Jacobian',
+#                         help='Include points for calculating '+
+#                         'the Jacobian of the field? "n"(default)/"y"')
+#     parser.add_argument('-d', '--dxyz_Jacobian',
+#                         help='What step size (in m) to use for points used in '+
+#                         'the Jacobian calculation? e.g. "0.001" (default)')
+#     parser.add_argument('-t', '--Testing',
+#                         help='Calculate using small subset of field points '+
+#                         ' (N=100000)? "y"/"n"(default).')
+#     parser.add_argument('-i', '--infile', help='pickle file with coordinate grid')
+#     args = parser.parse_args()
+#     # fill defaults where needed
+#     if args.Region is None:
+#         args.Region = 'DS'
+#     else:
+#         args.Region = args.Region.strip()
+#     reg = args.Region

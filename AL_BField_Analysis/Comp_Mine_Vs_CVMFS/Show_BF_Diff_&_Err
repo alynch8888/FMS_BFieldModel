@@ -1,0 +1,44 @@
+# print(cvmfs_data,"\n","Break","\n",my_data)
+# print(data[0,1])
+# print(data[0,0])
+z = [0,1,2,3,4,5]
+# print("Test")
+# for i in z:
+#   print(data[i,0])
+
+# print(load_DS_Sum)
+# print("TEST")
+# print(load_DS_Sum[0:1])
+
+a = my_data #Note: My data uses Gauss and meters.
+b = cvmfs_data #Note: CVMFS data uses Tesla and mm.
+#Conversions
+#1E4G=1T
+#1000mm=1m
+##########***Remember that cvmfs is initially in mm and Tesla***##########
+cvmfs_coord = cvmfs_data[:,0:3]# This is initially in mm. We are using only one of these so there is not reason to change.
+cvmfs_field = cvmfs_data[:,3:6]*1e4 #Unit Change to Gauss
+
+#########***Remember that my_data is initially in m and Gauss***##########
+mydata_coord = my_data[:,0:3]#/1e3 #Unit change to m. This change is not actually needed since the coordinates are the same. I use the coordinates from cvmfs, just because.
+mydata_field = my_data[:,3:6]#/1e4 #Keep in Gauss for easier to look at values.
+
+##########Everything should now be in m and Gauss##########
+# print(cvmfs_data)
+# print(cvmfs_coord)
+# print(cvmfs_field)
+sep = "######################### \n"
+# print(sep)
+# print(mydata_coord)
+# print(mydata_field)
+# print(sep)
+
+field_diff = mydata_field - cvmfs_field
+frac_error = field_diff/cvmfs_field
+per_err = 100*frac_error
+print(sep,"Field Difference(Gauss)")
+print(field_diff.round(7))
+print(sep,"Fractional Error")
+print(frac_error.round(7))
+# print(sep,"\n","Percent Error")
+# print(per_err)

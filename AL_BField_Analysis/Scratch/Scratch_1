@@ -1,0 +1,63 @@
+# # Load first file as base
+# df1 = load_pkl(Data_file[0])
+# df2 = load_pkl(Data_file[1])
+# df3 = load_pkl(Helicalc_file[0])
+# df4 = load_pkl(Helicalc_file[1])
+# coord_cols = df1.columns[[0,1,2,6,7]].tolist()
+# field_cols = df1.columns[[3,4,5,8,9]].tolist()
+# DS_PS_Map_Append = pd.concat([df1, df2], ignore_index=True)
+# print(DS_PS_Map_Append)
+# print("Summing:", field_cols)
+# # summed_field = df1[field_cols] + df2[field_cols]
+# # print(summed_field)
+# merged = df1.merge(df2, on = coord_cols, how = 'outer', suffixes = ('_a', '_b'))
+# print('Checking for overlap')
+# common = df1.merge(df2, on=coord_cols, how='inner')
+# print(f"Overlapping rows: {common.shape}")
+# print('Merged')
+# print(merged)
+# for col in field_cols:
+#   merged[col] = merged[f'{col}_a'].add(merged[f'{col}_b'], fill_value = 0)
+
+# summed_field = merged[df1.columns.tolist()]
+# print('Summed Fields')
+# print(summed_field.shape)
+# print(summed_field)
+# print('###DS Map###')
+# print(Data_file[0])
+# print(df1)
+# # print(df1.iloc[:, [3,4,5,8,9]])
+# print('###PS Map###')
+# print(df2)
+# print(Data_file[1])
+# # print(df2.iloc[:, [3,4,5,8,9]])
+# # print(Helicalc_file[0])
+# # print(df3.head())
+# # print(Helicalc_file[1])
+# # print(df4.head())
+
+# # for d in Helicalc_file:
+# #   load_pkl(Helicalc_file)
+
+
+# # print(summed_field.head())
+# # print(df1[coord_cols].equals(df2[coord_cols]))
+# # for fpath in Data_file[1:]:
+# #     df = load_pkl(fpath)
+# #     # Merge on coordinates
+# #     merged = result.merge(df, on=coord_cols, suffixes=('_a', '_b'))
+# #     # Sum field components
+# #     for col in field_cols:
+# #         merged[col] = merged[f'{col}_a'] + merged[f'{col}_b']
+# #     # Keep only original columns
+# #     result = merged[['X', 'Y', 'Z', 'Bx', 'By', 'Bz', 'R', 'Phi', 'Br', 'Bphi']]
+
+# # # Save
+# # with open(output_path, "wb") as f:
+# #     pickle.dump(result, f)
+
+# # print(f"Final shape: {result.shape}")
+# # print(result.head())
+
+# common = df1.merge(df2, on=['X','Y','Z'], how='inner')
+# print(f"Matching XYZ rows: {common.shape[0]}")

@@ -1,0 +1,8 @@
+#Paths
+
+DSMap_path = "/content/drive/MyDrive/BFields/data/"
+Busbar_Sum_path = "/content/drive/MyDrive/BFields/data/Bmaps/helicalc_partial/"
+Solcalc_Sum_path = "/content/drive/MyDrive/BFields/data/Bmaps/SolCalc_partial/"
+
+Solcalc_test_path = "/content/drive/MyDrive/BFields/data/Bmaps/SolCalc_partial/Solcalc_Summed.pkl"
+DS_Summed_pkl_path = "/content/drive/MyDrive/BFields/data/DS_Summed.pkl"

@@ -1,0 +1,73 @@
+##Fractional Error Plots with Gaussian Fits##
+from scipy.optimize import curve_fit
+
+def gaussian(x, amplitude, mean, sigma):
+    return amplitude * np.exp(-(x - mean)**2 / (2 * sigma**2))
+
+z_coord = cvmfs_coord[:,2]
+
+z_ranges = [(i * 1e3, (i + 1) * 1e3) for i in range(3, 17)] # In mm!
+# colors = ["steelblue", "darkorange", "seagreen"]
+colors = ["#0173B2", "#DE8F05", "#029E73"]
+labels = [r"$B_x(FracErr)$", r"$B_y(FracErr)$", r"$B_z(FracErr)$"]
+
+fig, axes = plt.subplots(len(z_ranges), 3, figsize=(15, 4 * len(z_ranges)))
+
+fit_results = {}  # store fit params per (z_range, component)
+
+for row, (lo, hi) in enumerate(z_ranges):
+    mask = (z_coord >= lo) & (z_coord < hi)
+    fd_slice = frac_error[mask]
+
+    for col in range(3):
+        ax = axes[row, col]
+        data_col = fd_slice[:, col]
+        data_col = data_col[~np.isnan(data_col)]
+
+        if data_col.size == 0:
+            continue
+
+        # Histogram (density=True so the Gaussian fit matches the scale)
+        counts, bin_edges, _ = ax.hist(data_col, bins=50, edgecolor="black",
+                 color=colors[col], alpha=1, label=labels[col], density=True)
+        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+        # Fit Gaussian
+        p0 = [counts.max(), np.mean(data_col), np.std(data_col)]
+        try:
+            popt, pcov = curve_fit(gaussian, bin_centers, counts, p0=p0, maxfev=10000)
+            amplitude, mean, sigma = popt
+            perr = np.sqrt(np.diag(pcov))
+
+            x_fit = np.linspace(data_col.min(), data_col.max(), 1000)
+            ax.plot(x_fit, gaussian(x_fit, *popt), color='red', linewidth=1.5,
+                     label=f'μ={mean:.2e}\nσ={sigma:.2e}')
+
+            fit_results[(lo, hi, col)] = {
+                'mean': mean, 'sigma': sigma,
+                'mean_err': perr[1], 'sigma_err': perr[2]
+            }
+        except RuntimeError:
+            print(f"Fit failed: z={lo:.0f}-{hi:.0f}mm, component={labels[col]}")
+
+        # ax.set_yscale("symlog")
+        ax.tick_params(axis='x', rotation=45)
+        ax.set_xlabel(labels[col])
+        ax.set_xlim(data_col.min(), data_col.max())
+        ax.set_title(f"{labels[col]}, z: {lo:.0f}-{hi:.0f}mm")
+        ax.legend(fontsize=8)
+
+    axes[row, 0].set_ylabel("Density")
+
+#Tracker region Z-range: 8540mm - 1181mm
+fracerror_title = r"$\frac{\mathrm{My\ Data} - \mathrm{CVMFS\ Data}}{\mathrm{CVMFS\ Data}}$"+"\n"+"\n"+"Date made: "+f"{today}"
+fig.suptitle(fracerror_title, fontsize=16, y=1.0)
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.tight_layout()
+plt.show()
+
+# Print all fit results
+for (lo, hi, col), res in fit_results.items():
+    print(f"z: {lo:.0f}-{hi:.0f}mm, {labels[col]}: "
+          f"μ = {res['mean']:.4g} ± {res['mean_err']:.4g}, "
+          f"σ = {res['sigma']:.4g} ± {res['sigma_err']:.4g}")

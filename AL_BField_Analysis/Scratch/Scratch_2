@@ -1,0 +1,46 @@
+# coord_cols = ['X', 'Y', 'Z']
+# field_cols = ['Bx', 'By', 'Bz']
+
+# output_path = os.path.join(helicalc_path, "busbar_summed.pkl")
+
+# result = None
+# for fname in helicalc_partial_pkl_array:
+#     fpath = os.path.join(helicalc_path, fname)
+#     df = load_pkl(fpath)
+
+#     # Rename field cols by position
+#     cols = df.columns.tolist()
+#     cols[3] = 'Bx'
+#     cols[4] = 'By'
+#     cols[5] = 'Bz'
+#     df.columns = cols
+
+#     if result is None:
+#         result = df
+#     else:
+#         merged = result.merge(df, on=coord_cols, how='outer', suffixes=('_a', '_b'))
+#         for col in field_cols:
+#             merged[col] = merged[f'{col}_a'].add(merged[f'{col}_b'], fill_value=0)
+#         result = merged[result.columns.tolist()]
+
+# with open(output_path, "wb") as f:
+#     pickle.dump(result, f)
+
+# txt_path = os.path.join(helicalc_path, "busbar_summed.txt")
+# result.to_csv(txt_path, sep='/', index=False)
+
+# print(f"Saved to {output_path}")
+# print(f"Saved to {txt_path}")
+
+# # print('helicalc_result')
+# # print(helicalc_result)
+
+
+# # merged = df1.merge(df2, on = coord_cols, how = 'outer', suffixes = ('_a', '_b'))
+# # print('Checking for overlap')
+# # common = df1.merge(df2, on=coord_cols, how='inner')
+# # print(f"Overlapping rows: {common.shape}")
+# # print('Merged')
+# # print(merged)
+# # for col in field_cols:
+# #   merged[col] = merged[f'{col}_a'].add(merged[f'{col}_b'], fill_value = 0)
