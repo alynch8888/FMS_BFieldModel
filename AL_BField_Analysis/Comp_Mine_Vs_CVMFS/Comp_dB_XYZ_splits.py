@@ -1,3 +1,26 @@
+#List of all the Official Imports I use.
+import pickle
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import sys
+
+
+#From import
+from scipy.stats import norm
+from scipy.optimize import curve_fit
+from datetime import date
+from Show_BF_Diff_and_Err import field_diff, cvmfs_coord, cvmfs_field, mydata_coord, mydata_field
+
+#Useful names that can be used elsewhere
+
+today = date.today()
+
+#Start of actual code
+print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
+
 z_coord = cvmfs_coord[:,2]
 # print(cvmfs_coord)
 # print(z_coord)
@@ -10,20 +33,6 @@ bins = np.concatenate([neg_bins, pos_bins])
 z_ranges = [(i * 1e3, (i + 1) * 1e3) for i in range(3, 17)] # In mm!
 colors = ["steelblue", "darkorange", "seagreen"]
 labels = [r"$\Delta B_x(G)$", r"$\Delta B_y(G)$", r"$\Delta B_z(G)$"]
-# print(z_ranges[0][0])
-# mask1 = (z_coord >= z_ranges[0][0]) & (z_coord < z_ranges[0][1])
-# mask2 = (z_coord >= z_ranges[1][0]) & (z_coord < z_ranges[1][1])
-# mask3 = (z_coord >= z_ranges[2][0]) & (z_coord < z_ranges[2][1])
-# print(mask1)
-
-# print(field_diff[mask1])
-# print("Field Difference Mask1")
-# # print(mask1)
-# print(field_diff[mask1])
-# print("Field Difference Mask2")
-# print(field_diff[mask2])
-# print("Field Difference Mask3")
-# print(field_diff[mask3])
 
 fig, axes = plt.subplots(len(z_ranges), 3, figsize=(15, 4 * len(z_ranges)))
 
@@ -50,11 +59,19 @@ for row, (lo, hi) in enumerate(z_ranges):
         ax.legend()
 
     axes[row, 0].set_ylabel("Count")
-#Tracker region Z-range: 8540mm - 1181mm
-# fig.suptitle(x=0,y=0)
-meter_split_title = "My Data - CVMFS Data"+ "\n" + f"{today}"
-# r"$\frac{\mathrm{My\ Data} - \mathrm{CVMFS\ Data}}{\mathrm{CVMFS\ Data}}$"+"\n"+"\n"+"Date made: "+f"{today}"
-fig.suptitle(meter_split_title, fontsize=16, y=1.0)
-plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.tight_layout()
-plt.show()
+
+if __name__ == "__main__":
+    meter_split_title = "My Data - CVMFS Data"+ "\n" + f"{today}"
+    fig.suptitle(meter_split_title, fontsize=16, y=1.0)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout()
+
+    # Save figure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    plot_dir = os.path.join(script_dir, "Comparison_Plots", f"{today}")
+    os.makedirs(plot_dir, exist_ok=True)
+    filename = f"Comp_dB_XYZ_splits_{today}.png"
+    fig.savefig(os.path.join(plot_dir, filename), bbox_inches='tight', dpi=150)
+    print(f"Saved: {os.path.join(plot_dir, filename)}")
+
+    # plt.show()

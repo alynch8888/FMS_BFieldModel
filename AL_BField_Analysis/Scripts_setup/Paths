@@ -1,5 +1,4 @@
 #Paths
-
 DSMap_path = "/content/drive/MyDrive/BFields/data/"
 Busbar_Sum_path = "/content/drive/MyDrive/BFields/data/Bmaps/helicalc_partial/"
 Solcalc_Sum_path = "/content/drive/MyDrive/BFields/data/Bmaps/SolCalc_partial/"

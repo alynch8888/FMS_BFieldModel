@@ -1,8 +1,29 @@
 ##Fractional Error Plots with Gaussian Fits##
+
+#List of all the Official Imports I use.
+import pickle
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import sys
+
+
+#From import
+from scipy.stats import norm
 from scipy.optimize import curve_fit
+from datetime import date
+
+from Show_BF_Diff_and_Err import cvmfs_coord, frac_error
+#Useful names that can be used elsewhere
+today = date.today()
 
 def gaussian(x, amplitude, mean, sigma):
     return amplitude * np.exp(-(x - mean)**2 / (2 * sigma**2))
+
+#Start of actual code
+print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
 
 z_coord = cvmfs_coord[:,2]
 
@@ -60,14 +81,26 @@ for row, (lo, hi) in enumerate(z_ranges):
     axes[row, 0].set_ylabel("Density")
 
 #Tracker region Z-range: 8540mm - 1181mm
-fracerror_title = r"$\frac{\mathrm{My\ Data} - \mathrm{CVMFS\ Data}}{\mathrm{CVMFS\ Data}}$"+"\n"+"\n"+"Date made: "+f"{today}"
-fig.suptitle(fracerror_title, fontsize=16, y=1.0)
-plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.tight_layout()
-plt.show()
 
-# Print all fit results
-for (lo, hi, col), res in fit_results.items():
-    print(f"z: {lo:.0f}-{hi:.0f}mm, {labels[col]}: "
-          f"μ = {res['mean']:.4g} ± {res['mean_err']:.4g}, "
-          f"σ = {res['sigma']:.4g} ± {res['sigma_err']:.4g}")
+
+
+if __name__ == "__main__":
+    fracerror_title = r"$\frac{\mathrm{My\ Data} - \mathrm{CVMFS\ Data}}{\mathrm{CVMFS\ Data}}$"+"\n"+"\n"+"Date made: "+f"{today}"
+    fig.suptitle(fracerror_title, fontsize=16, y=1.0)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout()
+
+    # Save figure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    plot_dir = os.path.join(script_dir, "Comparison_Plots", f"{today}")
+    os.makedirs(plot_dir, exist_ok=True)
+    filename = f"Frac_Err_w_Gauss_Fit_{today}.png"
+    fig.savefig(os.path.join(plot_dir, filename), bbox_inches='tight', dpi=150)
+    print(f"Saved: {os.path.join(plot_dir, filename)}")
+    # plt.show()
+
+    # Print all fit results
+    for (lo, hi, col), res in fit_results.items():
+        print(f"z: {lo:.0f}-{hi:.0f}mm, {labels[col]}: "
+            f"μ = {res['mean']:.4g} ± {res['mean_err']:.4g}, "
+            f"σ = {res['sigma']:.4g} ± {res['sigma_err']:.4g} \n")

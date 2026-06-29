@@ -1,5 +1,32 @@
+#List of all the Official Imports I use.
+import pickle
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import sys
+
+
+#From import
+# from scipy.stats import norm
+# from scipy.optimize import curve_fit
+from datetime import date
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from Scripts_setup.utils import shift_x, coord_shift, pkl_2_txt, sum_field_maps, sum_field_maps_w_shift
+from Comp_Mine_Vs_CVMFS.Show_BF_Diff_and_Err import cvmfs_coord, frac_error, mydata_field, mydata_coord, my_data
+
+
+
+#Useful names that can be used elsewhere
+today = date.today()
+
+#Start of actual code
+print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
+
 step = 0.25  # in meters
-z_starts = np.arange(8500, 9000, step)
+z_starts = np.arange(8.5, 9.0, step)
 z_ranges = [(z * 1e3, (z + step) * 1e3) for z in z_starts]
 def make_isosurface(data, value_col, title, colorscale='Viridis',
                      n_isomin_pct=10, n_isomax_pct=90, surface_count=15,
@@ -53,14 +80,14 @@ def plot_isosurfaces_by_zslice(df, value_col, colorscale, z_ranges):
     for z_min, z_max in z_ranges:
         slice_df = df[(df['Z'] >= z_min) & (df['Z'] < z_max)]
 
-        title = f"{value_col} Isosurface | Z: {z_min:.3f}-{z_max:.3f} "
+        title = f"{value_col} Isosurface | Z: {z_min:.0f}-{z_max:.0f} mm"
         fig = make_isosurface(slice_df, value_col, title=title, colorscale=colorscale)
 
         if fig is not None:
             figs.append(fig)
             fig.show()
         else:
-            print(f"Skipped Z range {z_min}-{z_max} (no data or flat slice)")
+            print(f"Skipped Z range {z_min}-{z_max} 'mm'(no data or flat slice)")
 
     return figs
 
