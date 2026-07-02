@@ -23,7 +23,7 @@ from Scripts_setup.utils import load_pkl
 #Start of actual code
 print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
 
-Mount_Directory = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel"
+Mount_Directory = "/mnt/c/Users/alynch/OneDrive/Documents/GitHub/FMS_BFieldModel"# $USER does display your computers username. 
 
 DS_Summed_txt_path = Mount_Directory + "/AL_BField_Analysis/Map_Files/DS_Summed.txt"
 DS_Summed_pkl_path = Mount_Directory + "/AL_BField_Analysis/Map_Files/DS_Summed.pkl"

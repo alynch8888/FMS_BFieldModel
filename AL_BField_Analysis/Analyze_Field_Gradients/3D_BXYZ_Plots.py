@@ -28,7 +28,7 @@ print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
 step = 0.25  # in meters
 z_starts = np.arange(8.5, 9.0, step)
 z_ranges = [(z * 1e3, (z + step) * 1e3) for z in z_starts]
-def make_isosurface(data, value_col, title, colorscale='Viridis',
+def make_isosurface(data, value_col, title, colorscale='Magma',
                      n_isomin_pct=10, n_isomax_pct=90, surface_count=15,
                      max_points=200_000):
     """
@@ -109,7 +109,7 @@ field_data = pd.DataFrame({
 # print(field_data['Z'].min(), field_data['Z'].max())
 # print(field_data['Z'].describe())
 # ----- Run for each component -----
-figs_bmag = plot_isosurfaces_by_zslice(field_data, 'Bmag', 'Viridis', z_ranges)
+# figs_bmag = plot_isosurfaces_by_zslice(field_data, 'Bmag', 'Viridis', z_ranges)
 # figs_bx   = plot_isosurfaces_by_zslice(field_data, 'Bx', 'RdBu', z_ranges)
 # figs_by   = plot_isosurfaces_by_zslice(field_data, 'By', 'RdBu', z_ranges)
-# figs_bz   = plot_isosurfaces_by_zslice(field_data, 'Bz', 'RdBu', z_ranges)
+figs_bz   = plot_isosurfaces_by_zslice(field_data, 'Bz', 'RdBu', z_ranges)
