@@ -16,6 +16,8 @@ from scipy.optimize import curve_fit
 from datetime import date
 
 from Show_BF_Diff_and_Err import cvmfs_coord, frac_error
+from Combined_Bfield_Eval import fd, fe
+
 #Useful names that can be used elsewhere
 today = date.today()
 
@@ -41,8 +43,8 @@ fig, axes = plt.subplots(len(z_ranges), 3, figsize=(15, 4 * len(z_ranges)))
 
 for row, (lo, hi) in enumerate(z_ranges):
     mask = (z_coord >= lo) & (z_coord < hi)
-    fd_slice = frac_error[mask]
-
+    # fd_slice = frac_error[mask]
+    fd_slice = fe[mask]
     for col in range(3):
         ax = axes[row, col]
         data_col = fd_slice[:, col]
@@ -73,7 +75,9 @@ if __name__ == "__main__":
 
     # Save figure
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    plot_dir = os.path.join(script_dir, "Comparison_Plots", f"{today}")
+    # plot_dir = os.path.join(script_dir, "Comparison_Plots", f"{today}")
+    plot_dir = os.path.join(script_dir, "Comparison_Plots_Compined_Data_File", f"{today}")
+
     os.makedirs(plot_dir, exist_ok=True)
     filename = f"Frac_Err_Plots_{today}.png"
     fig.savefig(os.path.join(plot_dir, filename), bbox_inches='tight', dpi=150)

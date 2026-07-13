@@ -15,6 +15,7 @@ from datetime import date
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from Comp_Mine_Vs_CVMFS.Show_BF_Diff_and_Err import frac_error, cvmfs_coord, mydata_field, cvmfs_field
+from Combined_Bfield_Eval import fe, fd
 #Useful names that can be used elsewhere
 today = date.today()
 

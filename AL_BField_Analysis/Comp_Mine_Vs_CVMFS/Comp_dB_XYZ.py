@@ -1,29 +1,31 @@
 #List of all the Official Imports I use.
-import pickle
+# import pickle
 import os
-import pandas as pd
+# import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-import sys
+# import plotly.graph_objects as go
+# import sys
 
 
 #From import
-from scipy.stats import norm
-from scipy.optimize import curve_fit
+# from scipy.stats import norm
+# from scipy.optimize import curve_fit
 from datetime import date
 
 #Useful names that can be used elsewhere
 today = date.today()
 
 # Plot Differences between my_data and cvmfs_data
-from Show_BF_Diff_and_Err import field_diff
+from Show_BF_Diff_and_Err import field_diff, frac_error
+from Combined_Bfield_Eval import fd, fe
 # from Scripts_setup.utils import 
 
 #Start of actual code
 print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")
 
-field_error = [frac_error[:, 0], frac_error[:, 1], frac_error[:, 2]]
+# field_error = [frac_error[:, 0], frac_error[:, 1], frac_error[:, 2]]
+field_error = [fe[:, 0], fe[:, 1], fe[:, 2]]
 
 
 #Logarithmic bin setup
