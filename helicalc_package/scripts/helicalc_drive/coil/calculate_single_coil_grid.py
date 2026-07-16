@@ -13,8 +13,16 @@ from helicalc.tools import (
     generate_cylindrical_grid_df,
     add_points_for_J
 )
-from helicalc.constants import dxyz_dict, TSd_grid, DS_grid, DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP, DS_cyl_grid_fine, DSCartVal_grid
-
+from helicalc.constants import (
+    dxyz_dict,
+    TSd_grid,
+    DS_grid,
+    DS_Tracker_grid,
+    DS_FMS_cyl_grid,
+    DS_FMS_cyl_grid_SP,
+    DS_cyl_grid_fine,
+    DSCartVal_grid
+)
 # data
 datadir = helicalc_data+'Bmaps/helicalc_partial/'
 
@@ -28,7 +36,9 @@ geom_df = read_solenoid_geom_combined(paramdir,paramname).iloc[55:].copy()
 chunk_file = helicalc_data+'Bmaps/aux/batch_N_helicalc_03-16-22.txt'
 df_chunks = pd.read_csv(chunk_file)
 
-regions = {'TSd': TSd_grid, 'DS': DS_grid, 'DSCylFMS': DS_FMS_cyl_grid,
+regions = {'TSd': TSd_grid, 'DS': DS_grid,
+           'DSTracker': DS_Tracker_grid,
+           'DSCylFMS': DS_FMS_cyl_grid,
            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine,
            'DSCartVal': DSCartVal_grid}
 

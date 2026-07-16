@@ -17,6 +17,7 @@ from helicalc.constants import (
     TSu_grid,
     TSd_grid,
     DS_grid,
+    DS_Tracker_grid,
     PStoDumpArea_grid,
     ProtonDumpArea_grid,
     DS_cyl2d_grid_5mm,
@@ -33,6 +34,7 @@ paramname = 'Mu2e_V13'
 datadir = helicalc_data+'Bmaps/SolCalc_partial/'
 
 regions = {'PS': PS_grid, 'TSu': TSu_grid, 'TSd': TSd_grid, 'DS': DS_grid,
+           'DSTracker': DS_Tracker_grid,
            'PStoDumpArea': PStoDumpArea_grid,
            'ProtonDumpArea': ProtonDumpArea_grid,
            'DSCyl2D': DS_cyl2d_grid_5mm,
