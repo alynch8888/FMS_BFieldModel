@@ -1,3 +1,21 @@
+#List of all the Official Imports I use.
+import pickle
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import sys
+
+
+#From import
+from scipy.stats import norm
+from scipy.optimize import curve_fit
+from datetime import date
+
+#Useful names that can be used elsewhere
+today = date.today()
+
 ##Data pkl files##
 data_pkl_array = [
     "DSMap.pkl",
@@ -7,24 +25,25 @@ data_pkl_array = [
 N_arc        = list(range(1,8,1))
 N_straight   = [12, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
 N_interlayer = [56, 57]#, 58]
-N_layer_1      = [56, 60, 63]
-N_layer_2      = [56]
+N_layer_1      = list(range(56,67,1))#[56, 60, 63]
+N_layer_2      = list(range(56,67,1))#[56]
 # print(list(range(1,8,1)))
+region_name = input("What is the prefix of the file you are using? ")
 helicalc_partial_pkl_array = (
-    [f"Mu2e_V13.DS_region.standard-busbar.cond_N_{n}_arc.pkl"                  for n in N_arc] +
-    [f"Mu2e_V13.DS_region.standard-busbar.cond_N_{n}_straight.pkl"             for n in N_straight] +
-    [f"Mu2e_V13.DS_region.standard-helicalc.coil_{n}_interlayer.pkl"           for n in N_interlayer] +
-    [f"Mu2e_V13.DS_region.standard-helicalc.coil_{n}_layer_1.pkl"              for n in N_layer_1] +
-    [f"Mu2e_V13.DS_region.standard-helicalc.coil_{n}_layer_2.pkl"              for n in N_layer_2]
+    [f"Mu2e_V13.{region_name}_region.standard-busbar.cond_N_{n}_arc.pkl"                  for n in N_arc] +
+    [f"Mu2e_V13.{region_name}_region.standard-busbar.cond_N_{n}_straight.pkl"             for n in N_straight] +
+    [f"Mu2e_V13.{region_name}_region.standard-helicalc.coil_{n}_interlayer.pkl"           for n in N_interlayer] +
+    [f"Mu2e_V13.{region_name}_region.standard-helicalc.coil_{n}_layer_1.pkl"              for n in N_layer_1] +
+    [f"Mu2e_V13.{region_name}_region.standard-helicalc.coil_{n}_layer_2.pkl"              for n in N_layer_2]
 )
 
 # print(set(filenames) == set(helicalc_partial_pkl_array))
 ##Solcalc pkl files##
-N_PS_coil = list(range(55, 0, -1))
+N_PS_coil = list(range(66, 0, -1))
 # N_DSCyFMSAll_coil = list(range(66, 0, -1))
 # N_DSCyFMSAll_Jacobian_coil = list(range(66, 0, -1))
 solcalc_partial_pkl_array = (
-    [f"Mu2e_V13.SolCalc.DS_region.standard.coil_{n}.pkl" for n in N_PS_coil] #+
+    [f"Mu2e_V13.SolCalc.{region_name}_region.standard.coil_{n}.pkl" for n in N_PS_coil] #+
     # ["Mu2e_V13.SolCalc.D0S_region.standard.coils_1-66.pkl"
     #  ]
 )
@@ -35,9 +54,9 @@ print(solcalc_partial_pkl_array)
 # pkl_2_txt
 
 
-data_path = "/content/drive/MyDrive/BFields/data"
-helicalc_path = "/content/drive/MyDrive/BFields/data/Bmaps/helicalc_partial"
-solcalc_path = "/content/drive/MyDrive/BFields/data/Bmaps/SolCalc_partial"
+data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data"#"/content/drive/MyDrive/BFields/data"
+helicalc_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/Bmaps/helicalc_partial"#"/content/drive/MyDrive/BFields/data/Bmaps/helicalc_partial"
+solcalc_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/Bmaps/SolCalc_partial"#"/content/drive/MyDrive/BFields/data/Bmaps/SolCalc_partial"
 
 #Helicalc_Drive Check(Data path)#
 print("Checking " + data_path + "...")

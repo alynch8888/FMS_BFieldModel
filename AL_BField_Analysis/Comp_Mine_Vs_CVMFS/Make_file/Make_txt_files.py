@@ -18,7 +18,7 @@ today = date.today()
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 ##My Definitions
-from Scripts_setup.utils import load_pkl
+from FMS_BFieldModel.AL_BField_Analysis.Scripts_setup.utils.utils import load_pkl
 
 #Start of actual code
 print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...")

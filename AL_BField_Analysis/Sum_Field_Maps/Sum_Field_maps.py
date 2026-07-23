@@ -15,7 +15,7 @@ from datetime import date
 
 #Useful names that can be used elsewhere
 today = date.today()
-from Scripts_setup.utils import shift_x, coord_shift, pkl_2_txt, sum_field_maps, sum_field_maps_w_shift
+from FMS_BFieldModel.AL_BField_Analysis.Scripts_setup.utils.utils import shift_x, coord_shift, pkl_2_txt, sum_field_maps, sum_field_maps_w_shift
 from Comp_Mine_Vs_CVMFS.Show_BF_Diff_and_Err import cvmfs_coord,cvmfs_field,mydata_coord,mydata_field
 
 #Start of actual code

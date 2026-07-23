@@ -32,7 +32,7 @@ def print_xyz_coord(filepath):
     for i, fpath in enumerate(filepath):
       df = load_pkl(fpath)
       # print(i, df.shape)
-      print(f"/n{fpath}")
+      print(f"\n{fpath}")
       for col in ['X','Y','Z']:
         print(f" {col}: {df[col].min()} to {df[col].max()}")
 
@@ -221,3 +221,104 @@ def fit_and_plot_gaussian(data, ax, label, color='C0', bins=100, linthresh=1e-2)
 
     return {'amplitude': amplitude, 'mean': mean, 'sigma': sigma,
             'amplitude_err': perr[0], 'mean_err': perr[1], 'sigma_err': perr[2]}
+
+
+##########Warn, offer a shift, re-check, and return the file list to actually sum##########
+def prep_group(filepaths, group_label):
+    if len(filepaths) < 2:
+        return filepaths
+
+    mismatched, ref_path = find_xyz_mismatches(filepaths)
+    if not mismatched:
+        print(f"{group_label}: XYZ coordinates match across all files. Good to go.")
+        return filepaths
+
+    print(f"\nWARNING: {group_label} XYZ coordinates are NOT the same across all files.")
+    print(f"Reference file: {ref_path}")
+    print_xyz_coord(filepaths)
+
+    make_shift = input(f"\nCreate a shifted file for the mismatched {group_label} file(s)? (y/n): ").strip().lower()
+    if make_shift != 'y':
+        print(f"Proceeding without shifting {group_label} files. The sum may contain NaNs from mismatched grids.")
+        return filepaths
+
+    choice = input("Use coord_shift or actual_shift? (coord_shift/actual_shift/no): ").strip().lower()
+    if choice == 'coord_shift':
+        shift_value = coord_shift
+    elif choice == 'actual_shift':
+        shift_value = actual_shift
+    else:
+        shift_value = float(input("What value do you want to shift the coordinates by? "))
+
+    updated_filepaths = list(filepaths)
+    for fpath in mismatched:
+        fdir = os.path.dirname(fpath)
+        fname = os.path.basename(fpath)
+        shift_x(fdir, fname, shift_value)
+        shifted_path = os.path.join(fdir, fname.replace('.pkl', f'_x_{shift_value}.pkl'))
+        updated_filepaths[updated_filepaths.index(fpath)] = shifted_path
+
+    ##Double check after shifting##
+    still_mismatched, _ = find_xyz_mismatches(updated_filepaths)
+    if still_mismatched:
+        print(f"\nWARNING: {group_label} XYZ coordinates STILL do not match after shifting.")
+        print_xyz_coord(updated_filepaths)
+    else:
+        print(f"\n{group_label}: XYZ coordinates now match after shifting. Good to go.")
+
+    return updated_filepaths
+
+##########with optional m->mm and Tesla->Gauss unit conversion##########
+def save_summed_txt(pkl_path, txt_path, convert_m_to_mm=False, convert_T_to_G=False, digits=12):
+    coord_cols = ['X', 'Y', 'Z']
+    field_cols = ['Bx', 'By', 'Bz']
+
+    df = load_pkl(pkl_path).copy()
+
+    if convert_m_to_mm and convert_T_to_G == 'y':
+        print("Changing m to mm and Tesla to Gauss...")
+    elif convert_m_to_mm:
+        print("Changing m to mm...")
+    elif convert_T_to_G:
+        print("Changing Tesla to Gauss...")
+
+    if convert_m_to_mm == True:
+        for col in coord_cols:
+            df[col] = df[col] * 1000
+    elif convert_m_to_mm == False:
+        for col in coord_cols:
+            df[col] = df[col] * 1
+
+    if convert_T_to_G == True:
+        for col in field_cols:
+            df[col] = df[col] * 10000
+    elif convert_T_to_G == False:
+        for col in coord_cols:
+            df[col] = df[col] * 1
+
+    if convert_m_to_mm or convert_T_to_G:
+        with open(pkl_path, "wb") as f:
+            pickle.dump(df, f)
+        print(f"Updated units and re-saved {pkl_path}")
+
+    factor = 10 ** digits
+    txt_df = df.copy()
+    for col in coord_cols + field_cols:
+        txt_df[col] = np.trunc(txt_df[col] * factor) / factor
+
+    txt_df.to_csv(txt_path, sep='\t', index=False, float_format=f'%.{digits}f')
+    print(f"Saved to {txt_path}")
+
+##########Check if X, Y, Z are the same across a list of files##########
+def find_xyz_mismatches(filepaths):
+    coord_cols = ['X', 'Y', 'Z']
+    ref_path = filepaths[0]
+    ref_xyz = load_pkl(ref_path)[coord_cols].sort_values(coord_cols).reset_index(drop=True)
+
+    mismatched = []
+    for fpath in filepaths[1:]:
+        xyz = load_pkl(fpath)[coord_cols].sort_values(coord_cols).reset_index(drop=True)
+        if not ref_xyz.equals(xyz):
+            mismatched.append(fpath)
+
+    return mismatched, ref_path
