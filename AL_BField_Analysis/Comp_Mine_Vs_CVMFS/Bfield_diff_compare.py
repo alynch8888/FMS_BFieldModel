@@ -95,8 +95,11 @@ for df in (mydata_df, cvmfs_df):
 
 #Inner merge — the two files are NOT the same size, so only compare rows where X,Y,Z match in BOTH
 merged = mydata_df.merge(cvmfs_df, on=coord_cols, how='inner', suffixes=('_mine', '_cvmfs'))
+# print(f"\nMatched points ({len(merged)}):")
+# print(merged[coord_cols + [f'{c}_mine' for c in field_cols] + [f'{c}_cvmfs' for c in field_cols]].to_string(index=False))
 
-print(f"MyData rows: {len(mydata_df)}")
+
+print(f"\nMyData rows: {len(mydata_df)}")
 print(f"CVMFS rows:  {len(cvmfs_df)}")
 print(f"Matching rows (inner join on X,Y,Z): {len(merged)}\n")
 
@@ -116,30 +119,37 @@ sep = "--------------------------------------------------"
 sep_n = "\n--------------------------------------------------\n"
 
 print(sep_n)
-fe_bound = input("What field error bound do you want to look at? ")
-print(f"You chose: {fe_bound}")
-mask1 = field_error[2] > float(fe_bound)
+# fe_bound = input("What field error bound do you want to look at? ")
+# print(f"You chose: {fe_bound}")
+# mask1 = field_error[2] > float(fe_bound)
 
 while True:
     fe_bound = input("\nWhat field error bound do you want to look at? (or 'q' to quit) ")
+    bf_trigger = input("\nWhat Bfield do you want to cutoff? (or 'q' to quit) ")
     if fe_bound.strip().lower() == 'q':
+        break
+    elif bf_trigger.strip().lower() == 'q':
         break
 
     print(f"You chose: {fe_bound}")
     mask1 = field_error[2] > float(fe_bound)
+    mask2 = mydata_field[:, 2] > float(bf_trigger)   # or cvmfs_field[:, 2], see note below
+    mask = mask1 & mask2
 
-    if mask1.any():
-        coords = cvmfs_coord[mask1]
-        errors = field_error[2][mask1]
+    if mask.any():
+        coords = cvmfs_coord[mask]
+        errors = field_error[2][mask]
+        my_field = mydata_field[mask]
+        cv_field = cvmfs_field[mask]
         true_count = 0
-        for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, mydata_field[mask1], cvmfs_field[mask1]):
+        for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
+            print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
             print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
-            print(f"CVMFS Field: Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
-            print(f"X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
+            print(f"CVMFS Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
             print(sep + "\n")
             true_count += 1
-        print(sep, sep, f"\n# of |B| FracErrs > {fe_bound}: ", true_count)
+        print(sep, f"\n# of |B| FracErrs > {fe_bound}: ", true_count)
+        trigger_frac = true_count / len(merged)
+        print(f"Tirggered Field Points: {round(trigger_frac, 5)}")
     else:
-        print(f"No rows found with frac_error_Bz > {fe_bound}")
-        # print(sep, "\n# of |B| FracErrs > 1: ",test)
-        # print(sep, "\n# of |B| FracErrs > 1: ",mask1.sum())
+        print(f"No rows found matching both conditions.")
