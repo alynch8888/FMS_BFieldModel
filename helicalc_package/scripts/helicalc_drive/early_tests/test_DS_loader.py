@@ -1,10 +1,10 @@
 import torch as tc
 import numpy as np
 
-from helicalc.coil import CoilIntegrator
-from helicalc.tools import *
-from helicalc.geometry import *
-from helicalc.integrate import *
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.tools import *
+from helicalc_utilities.geometry import *
+from helicalc_utilities.integrate import *
 
 import sys
 

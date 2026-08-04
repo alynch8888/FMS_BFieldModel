@@ -1,11 +1,11 @@
 import sys
 import argparse
 import numpy as np
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.tools import generate_cartesian_grid_df
-from helicalc.constants import DS_grid, dxyz_dict
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.tools import generate_cartesian_grid_df
+from helicalc_utilities.constants import DS_grid, dxyz_dict
 
 paramdir = helicalc_dir + 'dev/params/'
 paramname = 'Mu2e_V13'

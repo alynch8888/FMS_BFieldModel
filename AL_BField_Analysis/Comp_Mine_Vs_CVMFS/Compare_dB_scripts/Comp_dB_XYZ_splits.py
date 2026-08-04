@@ -12,8 +12,9 @@ import sys
 from scipy.stats import norm
 from scipy.optimize import curve_fit
 from datetime import date
-from Show_BF_Diff_and_Err import field_diff, cvmfs_coord, cvmfs_field, mydata_coord, mydata_field
-
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+# from Show_BF_Diff_and_Err import field_diff, cvmfs_coord, cvmfs_field, mydata_coord, mydata_field
+from Comp_Mine_Vs_CVMFS.Bfield_diff_compare import cvmfs_coord, mydata_field, cvmfs_field, field_diff
 #Useful names that can be used elsewhere
 
 today = date.today()

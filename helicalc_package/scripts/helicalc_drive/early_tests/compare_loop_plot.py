@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # from mpl_toolkits.mplot3d import Axes3D
 # import matplotlib.gridspec as gridspec
-from helicalc.tools import config_plots
+from helicalc_utilities.tools import config_plots
 
 config_plots()
 # plt.rcParams['axes.linewidth'] = 2

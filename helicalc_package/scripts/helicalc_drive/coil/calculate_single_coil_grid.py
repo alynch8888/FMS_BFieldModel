@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm import tqdm
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.tools import (
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.tools import (
     generate_cartesian_grid_df,
     generate_cylindrical_grid_df,
     add_points_for_J
 )
-from helicalc.constants import (
+from helicalc_utilities.constants import (
     dxyz_dict,
     TSd_grid,
     DS_grid,

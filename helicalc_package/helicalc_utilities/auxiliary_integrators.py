@@ -3,7 +3,7 @@ from time import time
 import numpy as np
 import torch as tc
 from tqdm import tqdm
-from helicalc import helicalc_data
+from helicalc_utilities import helicalc_data
 from .integrate import *
 from .constants import *
 from .tools import *

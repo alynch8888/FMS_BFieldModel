@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm import tqdm
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.auxiliary_integrators import RadialStraightIntegrator1D
-from helicalc.tools import generate_cartesian_grid_df, generate_cylindrical_grid_df, add_points_for_J
-from helicalc.constants import dr_radial_dict, TSd_grid, DS_grid, DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP, DS_cyl_grid_fine, DSCartVal_grid
-from helicalc.solenoid_geom_funcs import load_all_geoms
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.auxiliary_integrators import RadialStraightIntegrator1D
+from helicalc_utilities.tools import generate_cartesian_grid_df, generate_cylindrical_grid_df, add_points_for_J
+from helicalc_utilities.constants import dr_radial_dict, TSd_grid, DS_grid, DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP, DS_cyl_grid_fine, DSCartVal_grid
+from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
 
 # data
 datadir = helicalc_data+'Bmaps/auxiliary_partial/'

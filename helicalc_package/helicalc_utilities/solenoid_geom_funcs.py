@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.spatial.transform import Rotation
-from helicalc import helicalc_dir
+from helicalc_utilities import helicalc_dir
 from .geometry import read_solenoid_geom_combined
 
 # Loading dataframes with geometry information

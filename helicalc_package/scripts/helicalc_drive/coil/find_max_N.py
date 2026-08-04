@@ -1,8 +1,8 @@
 import subprocess
 import argparse
-from helicalc import helicalc_dir, helicalc_data
+from helicalc_utilities import helicalc_dir, helicalc_data
 #from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
+from helicalc_utilities.geometry import read_solenoid_geom_combined
 # from helicalc.tools import generate_cartesian_grid_df
 # from helicalc.constants import (
 #     PS_grid,

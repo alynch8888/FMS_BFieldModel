@@ -24,7 +24,7 @@ print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...\n") #This 
 
 coord_cols = ['X', 'Y', 'Z']
 field_cols = ['Bx', 'By', 'Bz']
-
+region = input("What region are you looking at? ")
 #If your X coords were shifted (coord_shift/actual_shift) and you want them displayed un-shifted, set this.
 x_offset_for_display = 0  # e.g. 3896 to undo a -3.896 m shift when printing in mm
 
@@ -64,7 +64,7 @@ def load_field_map(path):
     return df
 
 data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/"
-Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/"
+Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
 # if os.path.isdir(Summed_Files_path):
 #     print(f"Contents of {Summed_Files_path}:")
 #     for f in sorted(os.listdir(Summed_Files_path)):
@@ -74,10 +74,11 @@ Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldMod
 #     print(f"Warning: {Summed_Files_path} is not a directory — skipping listing.")
 
 
-mydata_path = "DS_Summed.pkl"#input(f"\n Which of your computed pkl field maps do you want to use?\n {Summed_Files_path}").strip()
+mydata_path = f"{region}_Summed.pkl"#input(f"\n Which of your computed pkl field maps do you want to use?\n {Summed_Files_path}").strip()
 if not os.path.isabs(mydata_path):
     mydata_path = os.path.join(Summed_Files_path, mydata_path)
-cvmfs_path  = f"{data_path}cvmfs_Maps/DSMap.txt".strip()
+# cvmfs_path  = f"{data_path}cvmfs_BMaps/DSMap.txt".strip()
+cvmfs_path = f"{data_path}Cole_valMaps/Mu2e_V13_DSCartVal_Helicalc_All_Coils_All_Busbars.txt".strip()
 
 mydata_df = load_field_map(mydata_path)[coord_cols + field_cols].copy()
 cvmfs_df  = load_field_map(cvmfs_path)[coord_cols + field_cols].copy()
@@ -107,49 +108,70 @@ if merged.empty:
     print("No matching X, Y, Z coordinates between the two files — nothing to compare.")
     sys.exit(0)
 
+
 cvmfs_coord  = merged[coord_cols].to_numpy()
 mydata_field = merged[[f'{c}_mine' for c in field_cols]].to_numpy()
 cvmfs_field  = merged[[f'{c}_cvmfs' for c in field_cols]].to_numpy()
 
 with np.errstate(divide='ignore', invalid='ignore'):
-    frac_error = (mydata_field - cvmfs_field) / cvmfs_field
+    field_diff = mydata_field - cvmfs_field
+    frac_error = field_diff / cvmfs_field
 
 field_error = [frac_error[:, 0], frac_error[:, 1], frac_error[:, 2]]
 sep = "--------------------------------------------------"
 sep_n = "\n--------------------------------------------------\n"
 
-print(sep_n)
-# fe_bound = input("What field error bound do you want to look at? ")
-# print(f"You chose: {fe_bound}")
-# mask1 = field_error[2] > float(fe_bound)
+if __name__ == "__main__":
+    print(sep_n)
+    # fe_bound = input("What field error bound do you want to look at? ")
+    # print(f"You chose: {fe_bound}")
+    # mask1 = field_error[2] > float(fe_bound)
 
-while True:
-    fe_bound = input("\nWhat field error bound do you want to look at? (or 'q' to quit) ")
-    bf_trigger = input("\nWhat Bfield do you want to cutoff? (or 'q' to quit) ")
-    if fe_bound.strip().lower() == 'q':
-        break
-    elif bf_trigger.strip().lower() == 'q':
-        break
+    while True:
+        bf_trigger_min = 0
+        bf_trigger_max = 0
+        fe_bound_min = 0
+        fe_bound_max = 0
+        print(f"Min BField(T): {round(np.min(mydata_field[:, 2]),4)}    Min FracErr: {round(np.min(field_error[2]),4)}")
+        print(f"Ave BField(T): {round(np.mean(mydata_field[:, 2]),4)}   Ave FracErr: {round(np.mean(field_error[2]),4)}")
+        print(f"Max BField(T): {round(np.max(mydata_field[:, 2]),4)}    Max FracErr: {round(np.max(field_error[2]),4)}")
+        bf_trigger_min = input("\nWhat min Bfield(T) do you want to cutoff? (or 'q' to quit) ")
+        if bf_trigger_min.strip().lower() == 'q':
+            break
+        bf_trigger_max = input("\nWhat max Bfield(T) do you want to cutoff? (or 'q' to quit) ")
+        if bf_trigger_max.strip().lower() == 'q':
+            break
 
-    print(f"You chose: {fe_bound}")
-    mask1 = field_error[2] > float(fe_bound)
-    mask2 = mydata_field[:, 2] > float(bf_trigger)   # or cvmfs_field[:, 2], see note below
-    mask = mask1 & mask2
+        fe_bound_min = input("\nWhat min frac field error bound do you want to look at? (or 'q' to quit) ")
+        if fe_bound_min.strip().lower() == 'q':
+            break
+        fe_bound_max = input("\nWhat max frac field error bound do you want to look at? (or 'q' to quit) ")
+        if fe_bound_max.strip().lower() == 'q':
+            break
+        print(sep)
+        
 
-    if mask.any():
-        coords = cvmfs_coord[mask]
-        errors = field_error[2][mask]
-        my_field = mydata_field[mask]
-        cv_field = cvmfs_field[mask]
-        true_count = 0
-        for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
-            print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
-            print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
-            print(f"CVMFS Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
-            print(sep + "\n")
-            true_count += 1
-        print(sep, f"\n# of |B| FracErrs > {fe_bound}: ", true_count)
-        trigger_frac = true_count / len(merged)
-        print(f"Tirggered Field Points: {round(trigger_frac, 5)}")
-    else:
-        print(f"No rows found matching both conditions.")
+        # print(f"You are triggering between {fe_bound_min} & {fe_bound_max}")
+        mask1 = (abs(field_error[2]) > float(fe_bound_min)) & (abs(field_error[2]) < float(fe_bound_max))
+        mask2 = (abs(mydata_field[:, 2]) > float(bf_trigger_min)) & (abs(mydata_field[:, 2]) < float(bf_trigger_max))
+        mask = mask1 & mask2
+
+        if mask.any():
+            coords = cvmfs_coord[mask]
+            errors = field_error[2][mask]
+            my_field = mydata_field[mask]
+            cv_field = cvmfs_field[mask]
+            true_count = 0
+            for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
+                print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
+                print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
+                print(f"CVMFS Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
+                print(sep + "\n")
+                true_count += 1
+            print(sep, f"\n|B| Field Trigger: {bf_trigger_min} < |B| < {bf_trigger_max}")
+            print(f"# of |B| {fe_bound_min} < FracErrs < {fe_bound_max}: ", true_count)
+            
+            trigger_frac = true_count / len(merged)
+            print(f"Triggered Frac Error: {round(trigger_frac, 5)}","\n")
+        else:
+            print(f"No rows found matching both conditions.")

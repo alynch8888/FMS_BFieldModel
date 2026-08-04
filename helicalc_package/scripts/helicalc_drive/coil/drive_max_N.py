@@ -2,8 +2,8 @@ import subprocess
 #import argparse
 import numpy as np
 import pandas as pd
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.geometry import read_solenoid_geom_combined
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.geometry import read_solenoid_geom_combined
 
 paramdir = helicalc_dir + 'dev/params/'
 paramname = 'Mu2e_V13'

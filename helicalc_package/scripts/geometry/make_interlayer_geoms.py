@@ -4,9 +4,9 @@ import pandas as pd
 from scipy.spatial.transform import Rotation
 import lmfit as lm
 
-from helicalc import helicalc_dir
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.coil import CoilIntegrator
+from helicalc_utilities import helicalc_dir
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.coil import CoilIntegrator
 
 # downweight midpoint
 weights_default = np.array([[0.1, 1],[0.1, 1],[0.1, 1]])

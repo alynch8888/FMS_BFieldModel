@@ -17,7 +17,9 @@ from datetime import date
 today = date.today()
 
 # Plot Differences between my_data and cvmfs_data
-from Show_BF_Diff_and_Err import field_diff, frac_error
+# from Show_BF_Diff_and_Err import field_diff, frac_error
+from Bfield_diff_compare import cvmfs_coord, mydata_field, cvmfs_field, field_diff
+
 from Combined_Bfield_Eval import fd, fe
 # from Scripts_setup.utils import 
 

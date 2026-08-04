@@ -13,10 +13,10 @@ from dash import dash_table#import dash_table
 from dash.dash_table.Format import Format, Scheme
 
 # SolCalc
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.solcalc import SolCalcIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.cylinders import get_thick_cylinders_padded
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.solcalc import SolCalcIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.cylinders import get_thick_cylinders_padded
 # additional code & info for Mu2e-II PS
 sys.path.append(helicalc_dir+'scripts/SolCalc_GUI/')
 from requirements_Mu2e import *

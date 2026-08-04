@@ -1,7 +1,7 @@
 import subprocess
 import argparse
-from helicalc.constants import dxyz_straight_bar_dict, TSd_grid, DS_grid
-from helicalc.solenoid_geom_funcs import load_all_geoms
+from helicalc_utilities.constants import dxyz_straight_bar_dict, TSd_grid, DS_grid
+from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
 
 # load straight bus bars, dump all other geometries
 paramname = 'Mu2e_V13'

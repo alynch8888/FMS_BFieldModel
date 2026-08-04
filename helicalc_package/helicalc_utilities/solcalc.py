@@ -12,9 +12,9 @@ import multiprocessing
 from joblib import Parallel, delayed
 
 # imports from this library
-from helicalc.tools import get_gpu_memory_map
-from helicalc.integrate import trapz_2d
-from helicalc.constants import MAXMEM, mu0
+from helicalc_utilities.tools import get_gpu_memory_map
+from helicalc_utilities.integrate import trapz_2d
+from helicalc_utilities.constants import MAXMEM, mu0
 
 # move these functions elsewhere?
 def k2(r, z, a):
@@ -365,8 +365,8 @@ def integrate_grid(SolCalc, df, N_proc=None, OPTIMAL=None, tqdm=tqdm, verbose=Fa
 
 
 if __name__=='__main__':
-    from helicalc import helicalc_dir
-    from helicalc.geometry import read_solenoid_geom_combined
+    from helicalc_utilities import helicalc_dir
+    from helicalc_utilities.geometry import read_solenoid_geom_combined
     geom_df_mu2e = read_solenoid_geom_combined(helicalc_dir+'dev/params/','Mu2e_V13')
     i = 0 # 1st coil in the PS
     #i = 5 # coil in the TS

@@ -141,13 +141,13 @@ def shift_x(filepath, filename, coord_shift):
     print(f"Saved to {output_path}")
 
 ##########Sum Field Maps (Drops R, Phi, Br, and Bphi; keeps X, Y, Z, Bx, By, Bz)##########
-def sum_field_maps(fileoutput_path, filename, pklarray):
+def sum_field_maps(pkl_output_path, txt_output_path, filename, pklarray):
     coord_cols = ['X', 'Y', 'Z']
     field_cols = ['Bx', 'By', 'Bz']
     keep_cols = coord_cols + field_cols  # ['X', 'Y', 'Z', 'Bx', 'By', 'Bz']
 
-    output_pkl = os.path.join(fileoutput_path, filename + ".pkl")
-    output_csv = os.path.join(fileoutput_path, filename + ".txt")
+    output_pkl = os.path.join(pkl_output_path, filename + ".pkl")
+    output_csv = os.path.join(txt_output_path, filename + ".txt")
 
     result = None
     for fpath in pklarray:
@@ -299,7 +299,7 @@ def save_summed_txt(pkl_path, txt_path, convert_m_to_mm=False, convert_T_to_G=Fa
     if convert_m_to_mm or convert_T_to_G:
         with open(pkl_path, "wb") as f:
             pickle.dump(df, f)
-        print(f"Updated units and re-saved {pkl_path}")
+        print(f"Updated units and re-saved: \nSaved to {pkl_path}")
 
     factor = 10 ** digits
     txt_df = df.copy()

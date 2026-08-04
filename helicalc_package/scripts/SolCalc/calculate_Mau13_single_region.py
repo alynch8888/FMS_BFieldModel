@@ -4,15 +4,15 @@ from datetime import datetime
 import argparse
 import numpy as np
 import pandas as pd
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.solcalc import *
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.tools import (
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.solcalc import *
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.tools import (
     generate_cartesian_grid_df,
     generate_cylindrical_grid_df,
     add_points_for_J
 )
-from helicalc.constants import (
+from helicalc_utilities.constants import (
     PS_grid,
     TSu_grid,
     TSd_grid,

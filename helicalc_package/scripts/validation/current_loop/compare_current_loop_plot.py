@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from helicalc import helicalc_data
-from helicalc.tools import config_plots
+from helicalc_utilities import helicalc_data
+from helicalc_utilities.tools import config_plots
 config_plots()
 # face color issue
 plt.rcParams['axes.facecolor']='white'

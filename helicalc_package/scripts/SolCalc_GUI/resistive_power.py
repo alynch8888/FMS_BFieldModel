@@ -1,7 +1,7 @@
 # unlikely to use often in helicalc main package, so I am putting this as a
 # standalone utility in the GUI directory.
 import numpy as np
-from helicalc.tools import calc_cable_lengths
+from helicalc_utilities.tools import calc_cable_lengths
 
 # resistivities
 rho_Cu = 1.68e-8 # Ohm m, 20 deg C
