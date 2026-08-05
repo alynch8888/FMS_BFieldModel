@@ -275,38 +275,54 @@ def save_summed_txt(pkl_path, txt_path, convert_m_to_mm=False, convert_T_to_G=Fa
 
     df = load_pkl(pkl_path).copy()
 
-    if convert_m_to_mm and convert_T_to_G == 'y':
+    if convert_m_to_mm and convert_T_to_G:
         print("Changing m to mm and Tesla to Gauss...")
+        # new_coord_cols = ['X(mm)', 'Y(mm)', 'Z(mm)']
+        # new_field_cols = ['Bx(G)', 'By(G)', 'Bz(G)']
     elif convert_m_to_mm:
         print("Changing m to mm...")
+        # new_coord_cols = ['X(mm)', 'Y(mm)', 'Z(mm)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
     elif convert_T_to_G:
         print("Changing Tesla to Gauss...")
+        # new_coord_cols = ['X(m)', 'Y(m)', 'Z(m)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
+    # else:
+        # new_coord_cols = ['X(m)', 'Y(m)', 'Z(m)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
 
-    if convert_m_to_mm == True:
+    if convert_m_to_mm:
         for col in coord_cols:
-            df[col] = df[col] * 1000
-    elif convert_m_to_mm == False:
-        for col in coord_cols:
-            df[col] = df[col] * 1
-
-    if convert_T_to_G == True:
+            df[col] = df[col] * 1e3 #1m=1e3mm
+    if convert_T_to_G:
         for col in field_cols:
-            df[col] = df[col] * 10000
-    elif convert_T_to_G == False:
-        for col in coord_cols:
-            df[col] = df[col] * 1
+            df[col] = df[col] * 1e4 #1e4G=1T
+
+    # df.rename(columns=dict(zip(coord_cols + field_cols)), inplace=True)
 
     if convert_m_to_mm or convert_T_to_G:
         with open(pkl_path, "wb") as f:
             pickle.dump(df, f)
         print(f"Updated units and re-saved: \nSaved to {pkl_path}")
 
-    factor = 10 ** digits
+    coord_digits = 3   # e.g. 3 decimal places for mm
+    field_digits = 12  # more precision for field values
+    coord_factor = 1 ** coord_digits
+    field_factor = 10 ** field_digits
     txt_df = df.copy()
-    for col in coord_cols + field_cols:
-        txt_df[col] = np.trunc(txt_df[col] * factor) / factor
+    for col in coord_cols:
+        txt_df[col] = np.trunc(txt_df[col] * coord_factor) / coord_factor
+    for col in field_cols:
+        txt_df[col] = np.trunc(txt_df[col] * field_factor) / field_factor
 
-    txt_df.to_csv(txt_path, sep='\t', index=False, float_format=f'%.{digits}f')
+    coord_unit = 'mm' if convert_m_to_mm else 'm'
+    field_unit = 'G' if convert_T_to_G else 'T'
+    units = [coord_unit] * 3 + [field_unit] * 3
+
+    with open(txt_path, 'w') as f:
+        f.write('\t'.join(units) + '\n')
+        f.write('\t'.join(coord_cols + field_cols) + '\n')
+        txt_df.to_csv(f, sep='\t', index=False, header=False, float_format=f'%.{digits}f')
     print(f"Saved to {txt_path}")
 
 ##########Check if X, Y, Z are the same across a list of files##########
