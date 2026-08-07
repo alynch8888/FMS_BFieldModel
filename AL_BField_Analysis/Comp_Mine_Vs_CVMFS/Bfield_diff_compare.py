@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit
 from datetime import date
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  # adjust '..' depth to match where this script lives, same as Show_xyz.py
-from Scripts_setup.utils.utils import load_pkl  # adjust the module path to match your directory depth
+from Scripts_setup.utils.utils import load_pkl, countdown, navigate, load_field_map  # adjust the module path to match your directory depth
 
 #Useful names that can be used elsewhere
 today = date.today()
@@ -24,84 +24,49 @@ print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...\n") #This 
 
 coord_cols = ['X', 'Y', 'Z']
 field_cols = ['Bx', 'By', 'Bz']
-region = input("What region are you looking at? ")
+#region = input("What region are you looking at? ")
 #If your X coords were shifted (coord_shift/actual_shift) and you want them displayed un-shifted, set this.
 x_offset_for_display = 0  # e.g. 3896 to undo a -3.896 m shift when printing in mm
 
-def load_field_map(path):
-    """Load a field map from a .pkl, a CVMFS-style grid text file (with '#'/param/grid
-    header lines followed by a bare 'data' marker line), or a plain delimited text file."""
-    ext = os.path.splitext(path)[1].lower()
-    if ext == '.pkl':
-        return load_pkl(path)
-
-    with open(path, 'r') as f:
-        lines = f.readlines()
-
-    # CVMFS-style grid file: "# Origin shift...", "param ...", "grid X0=...", then a
-    # line that is just "data", then raw X Y Z Bx By Bz rows with no column header.
-    data_start = None
-    for i, line in enumerate(lines):
-        if line.strip().lower() == 'data':
-            data_start = i + 1
-            break
-
-    if data_start is not None:
-        return pd.read_csv(
-            path, sep=r'\s+', header=None, skiprows=data_start,
-            names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz']
-        )
-
-    # Fallback: plain delimited text, try with a header row first
-    df = pd.read_csv(path, sep=r'\s+', comment='#')
-    if not {'X', 'Y', 'Z'}.issubset(df.columns):
-        # No usable header row — re-read with no header and assign columns by position
-        df = pd.read_csv(path, sep=r'\s+', comment='#', header=None)
-        cols = df.columns.tolist()
-        cols[0], cols[1], cols[2] = 'X', 'Y', 'Z'
-        cols[3], cols[4], cols[5] = 'Bx', 'By', 'Bz'
-        df.columns = cols
-    return df
-
 data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/"
+
 Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
-# if os.path.isdir(Summed_Files_path):
-#     print(f"Contents of {Summed_Files_path}:")
-#     for f in sorted(os.listdir(Summed_Files_path)):
-#         if f.endswith('.pkl'):
-#             print(f"  {f}")
-# else:
-#     print(f"Warning: {Summed_Files_path} is not a directory — skipping listing.")
+mydata_path = navigate(Summed_Files_path, "for your data \".pkl\" file?", ".pkl")
+mydata_name = os.path.splitext(os.path.basename(mydata_path[0]))[0]
 
 
-mydata_path = f"{region}_Summed.pkl"#input(f"\n Which of your computed pkl field maps do you want to use?\n {Summed_Files_path}").strip()
-if not os.path.isabs(mydata_path):
-    mydata_path = os.path.join(Summed_Files_path, mydata_path)
-# cvmfs_path  = f"{data_path}cvmfs_BMaps/DSMap.txt".strip()
-cvmfs_path = f"{data_path}Cole_valMaps/Mu2e_V13_DSCartVal_Helicalc_All_Coils_All_Busbars.txt".strip()
+# mydata_path = f"{region}_Summed.pkl"#input(f"\n Which of your computed pkl field maps do you want to use?\n {Summed_Files_path}").strip()
+if not os.path.isabs(mydata_path[0]):
+    mydata_path = os.path.join(Summed_Files_path, mydata_path[0])
 
-mydata_df = load_field_map(mydata_path)[coord_cols + field_cols].copy()
-cvmfs_df  = load_field_map(cvmfs_path)[coord_cols + field_cols].copy()
+# comparison_path = f"{data_path}Cole_valMaps/Mu2e_V13_DSCartVal_Helicalc_All_Coils_All_Busbars.txt".strip()
+# comparison_name = os.path.splitext(os.path.basename(comparison_path))[0]
+comparison_file = navigate(data_path,"for your comparison \".pkl\" file?", ".pkl")
+comparison_path, comparison_name = comparison_file[0],comparison_file[1]
+
+mydata_df = load_field_map(mydata_path[0])[coord_cols + field_cols].copy()
+comparison_df  = load_field_map(comparison_path)[coord_cols + field_cols].copy()
 
 ##Diagnostic: compare coordinate ranges before merging##
-for label, df in [("MyData", mydata_df), ("CVMFS", cvmfs_df)]:
+for label, df in [(f"\"{mydata_name}\"", mydata_df), (f"\"{comparison_name}\"", comparison_df)]:
     print(f"\n{label} coordinate ranges:")
     for col in coord_cols:
         print(f"  {col}: {df[col].min():.4f} to {df[col].max():.4f}")
 
 #Round coords to avoid float precision mismatches on merge (per known issue with shifted X values)
-for df in (mydata_df, cvmfs_df):
+for df in (mydata_df, comparison_df):
     for col in coord_cols:
         df[col] = df[col].round(3)
 
 #Inner merge — the two files are NOT the same size, so only compare rows where X,Y,Z match in BOTH
-merged = mydata_df.merge(cvmfs_df, on=coord_cols, how='inner', suffixes=('_mine', '_cvmfs'))
+merged = mydata_df.merge(comparison_df, on=coord_cols, how='inner', suffixes=('_mine', '_cvmfs'))
+merged = merged.dropna()
 # print(f"\nMatched points ({len(merged)}):")
 # print(merged[coord_cols + [f'{c}_mine' for c in field_cols] + [f'{c}_cvmfs' for c in field_cols]].to_string(index=False))
 
 
-print(f"\nMyData rows: {len(mydata_df)}")
-print(f"CVMFS rows:  {len(cvmfs_df)}")
+print(f"\n{mydata_name} rows: {len(mydata_df)}")
+print(f"{comparison_name} rows:  {len(comparison_df)}")
 print(f"Matching rows (inner join on X,Y,Z): {len(merged)}\n")
 
 if merged.empty:
@@ -109,13 +74,14 @@ if merged.empty:
     sys.exit(0)
 
 
-cvmfs_coord  = merged[coord_cols].to_numpy()
+comparison_coord  = merged[coord_cols].to_numpy()
 mydata_field = merged[[f'{c}_mine' for c in field_cols]].to_numpy()
-cvmfs_field  = merged[[f'{c}_cvmfs' for c in field_cols]].to_numpy()
+comparison_field  = merged[[f'{c}_cvmfs' for c in field_cols]].to_numpy()
 
 with np.errstate(divide='ignore', invalid='ignore'):
-    field_diff = mydata_field - cvmfs_field
-    frac_error = field_diff / cvmfs_field
+    field_diff = mydata_field - comparison_field
+    frac_error = field_diff / comparison_field
+    frac_diff = mydata_field / comparison_field
 
 field_error = [frac_error[:, 0], frac_error[:, 1], frac_error[:, 2]]
 sep = "--------------------------------------------------"
@@ -141,7 +107,6 @@ if __name__ == "__main__":
         bf_trigger_max = input("\nWhat max Bfield(T) do you want to cutoff? (or 'q' to quit) ")
         if bf_trigger_max.strip().lower() == 'q':
             break
-
         fe_bound_min = input("\nWhat min frac field error bound do you want to look at? (or 'q' to quit) ")
         if fe_bound_min.strip().lower() == 'q':
             break
@@ -152,15 +117,16 @@ if __name__ == "__main__":
         
 
         # print(f"You are triggering between {fe_bound_min} & {fe_bound_max}")
+
         mask1 = (abs(field_error[2]) > float(fe_bound_min)) & (abs(field_error[2]) < float(fe_bound_max))
         mask2 = (abs(mydata_field[:, 2]) > float(bf_trigger_min)) & (abs(mydata_field[:, 2]) < float(bf_trigger_max))
         mask = mask1 & mask2
 
         if mask.any():
-            coords = cvmfs_coord[mask]
+            coords = comparison_coord[mask]
             errors = field_error[2][mask]
             my_field = mydata_field[mask]
-            cv_field = cvmfs_field[mask]
+            cv_field = comparison_field[mask]
             true_count = 0
             for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
                 print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")

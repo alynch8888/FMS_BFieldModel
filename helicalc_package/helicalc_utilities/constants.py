@@ -35,6 +35,9 @@ DS_grid = {'X0':-5.096, 'Y0':-1.200, 'Z0':3.071,
 DS_Tracker_grid = {'X0':-5.096, 'Y0':-1.200, 'Z0':8.071,
            'nX':44, 'nY':44, 'nZ':100,#521
            'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
+Cole_val_grid = {'X0':-4.696, 'Y0':-0.800, 'Z0':4.225,
+           'nX':33, 'nY':33, 'nZ':100,#'nX':65, 'nY':65, 'nZ':385,
+           'dX':0.025, 'dY':0.025, 'dZ':0.025}
 # FMS big propeller measurements
 # using the values currently set up in Mu2E field fitting. But this was
 # defined based on Mau13 grid points, so we could adjust if needed.

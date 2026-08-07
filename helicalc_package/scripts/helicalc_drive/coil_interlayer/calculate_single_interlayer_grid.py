@@ -4,6 +4,10 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import argparse
+import torch as tc
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 from tqdm import tqdm
 from helicalc_utilities import helicalc_dir, helicalc_data
 from helicalc_utilities.busbar import ArcIntegrator3D
@@ -78,7 +82,8 @@ if __name__=='__main__':
     # kludge to add "_il" to "cond N"
     #(to not confuse with other arc segment column names)
     df_cond['cond N'] = f'{int(df_cond["cond N"])}_il'
-
+    print(df_cond.dtype)
+    
     R = df_cond.R0
     # pick correct integration grid based on which SC cross section
     if df_cond['T'] < 7e-3:

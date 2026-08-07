@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import sys
+import time
+import subprocess
 #From import
 from scipy.stats import norm
 from scipy.optimize import curve_fit
@@ -37,7 +39,7 @@ def print_xyz_coord(filepath):
         print(f" {col}: {df[col].min()} to {df[col].max()}")
 
 ##########Sum Field Maps########## Does not drop R,Phi, BR, and BPhi
-def sum_field_maps(filepath,filename,pklarray):
+def sum_field_maps_Keeps_R_phi_Bphi(filepath,filename,pklarray):
     coord_cols = ['X', 'Y', 'Z']
     field_cols = ['Bx', 'By', 'Bz']
 
@@ -307,7 +309,7 @@ def save_summed_txt(pkl_path, txt_path, convert_m_to_mm=False, convert_T_to_G=Fa
 
     coord_digits = 3   # e.g. 3 decimal places for mm
     field_digits = 12  # more precision for field values
-    coord_factor = 1 ** coord_digits
+    coord_factor = 10 ** coord_digits
     field_factor = 10 ** field_digits
     txt_df = df.copy()
     for col in coord_cols:
@@ -338,3 +340,95 @@ def find_xyz_mismatches(filepaths):
             mismatched.append(fpath)
 
     return mismatched, ref_path
+##Cr##
+def countdown():
+    count = 3
+    while count > 0:
+        print(f"{count} ", end='', flush=True)
+        time.sleep(1)
+        count -= 1
+    print("Exiting the script...")
+    time.sleep(0.5)
+    os.system('clear')
+
+def navigate(directory, text, file_mask):
+    while True:
+        entries = sorted(os.listdir(directory))
+        folders = [e for e in entries if os.path.isdir(os.path.join(directory, e))]
+        file_mask = file_mask
+        if file_mask == "":
+            files   = [e for e in entries if os.path.isfile(os.path.join(directory, e))]
+        else:
+            files   = [e for e in entries if os.path.isfile(os.path.join(directory, e)) and e.endswith(file_mask)]
+        items   = folders + files
+
+        if not items:
+            print(f"No folders or files found in: {directory}")
+            return
+        print(f"\nCurrent directory: {directory}\n")
+        print(f"Let's grab the file you want to use {text}")
+        print("------------------------------------------")
+        for i, item in enumerate(items):
+            tag = "[DIR] " if os.path.isdir(os.path.join(directory, item)) else "[FILE]"
+            print(f"{i+1}. {tag} {item}")
+
+        print("---------------------------------------------------------------")
+        user_input = input("Enter the option number, 'q' for quick exit, or 'exit' to quit: ").strip()
+
+        if user_input == 'exit':
+            countdown()
+            return
+        elif user_input.lower() == 'q':
+            os.system('clear')
+            print("Quick exit. Bye!")
+            return
+        elif user_input.isdigit():
+            num_input = int(user_input)
+            if 1 <= num_input <= len(items):
+                selected_path = os.path.join(directory, items[num_input - 1])
+                if os.path.isdir(selected_path):
+                    directory = selected_path
+                else:
+                    selected_path_name = os.path.splitext(os.path.basename(selected_path))[0]
+                    return selected_path, selected_path_name
+            else:
+                print("Invalid option. Please enter a valid number.")
+        else:
+            print("Invalid input. Please enter a valid number, 'q' for quick exit, or 'exit' to quit.")
+
+##Loads a field map from a .pkl file, then delimits it based on CVMFS-styled grid.
+
+def load_field_map(path):
+    """Load a field map from a .pkl, a CVMFS-style grid text file (with '#'/param/grid
+    header lines followed by a bare 'data' marker line), or a plain delimited text file."""
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.pkl':
+        return load_pkl(path)
+
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    # CVMFS-style grid file: "# Origin shift...", "param ...", "grid X0=...", then a
+    # line that is just "data", then raw X Y Z Bx By Bz rows with no column header.
+    data_start = None
+    for i, line in enumerate(lines):
+        if line.strip().lower() == 'data':
+            data_start = i + 1
+            break
+
+    if data_start is not None:
+        return pd.read_csv(
+            path, sep=r'\s+', header=None, skiprows=data_start,
+            names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz']
+        )
+
+    # Fallback: plain delimited text, try with a header row first
+    df = pd.read_csv(path, sep=r'\s+', comment='#')
+    if not {'X', 'Y', 'Z'}.issubset(df.columns):
+        # No usable header row — re-read with no header and assign columns by position
+        df = pd.read_csv(path, sep=r'\s+', comment='#', header=None)
+        cols = df.columns.tolist()
+        cols[0], cols[1], cols[2] = 'X', 'Y', 'Z'
+        cols[3], cols[4], cols[5] = 'Bx', 'By', 'Bz'
+        df.columns = cols
+    return df

@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm import tqdm
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 from helicalc_utilities import helicalc_dir, helicalc_data
 from helicalc_utilities.busbar import StraightIntegrator3D
 from helicalc_utilities.tools import (

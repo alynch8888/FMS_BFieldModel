@@ -1,9 +1,12 @@
 import subprocess
 import argparse
 from math import ceil
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 from helicalc_utilities.constants import dxyz_arc_bar_dict, TSd_grid, DS_grid
 from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
-
+import torch as tc
 # load straight bus bars, dump all other geometries
 paramname = 'Mu2e_V13'
 version = paramname.replace('Mu2e_V', '')
@@ -66,13 +69,21 @@ if __name__=='__main__':
         args.Testing = args.Testing.strip()
     Test = args.Testing
 
-    print(f'Running on GPU: {Dev}')
-    for i in interlayer_GPU_dict[Dev]:
-        df_cn = df_interlayer.iloc[i]
-        # not sure why int conversion is necessary here
-        cn = int(df_cn['cond N'])
-        append = '' if args.infile is None else f' -i {args.infile}'
-        print(f'Calculating {i}: cond N (i.e. Coil_Num)={cn}')
-        _ = subprocess.run(f'python calculate_single_interlayer_grid.py'+
-                           f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
-                           capture_output=False)
+
+
+    gpu_count = tc.cuda.device_count()
+    gpu_shift = int(round(4/gpu_count,0))
+    for run in range(gpu_shift):
+        coil_list = interlayer_GPU_dict[run]
+        print(f'Run {run+1}: Running coil group {run} on GPU {Dev}')
+        # print(f'Running on GPU: {Dev}')
+        for i in coil_list:
+            df_cn = df_interlayer.iloc[i]
+            # not sure why int conversion is necessary here
+            cn = int(df_cn['cond N'])
+            append = '' if args.infile is None else f' -i {args.infile}'
+            print(f'Calculating {i}: cond N (i.e. Coil_Num)={cn}')
+            _ = subprocess.run(f'python calculate_single_interlayer_grid.py'+
+                            f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+                            capture_output=False)
+        print("\n")

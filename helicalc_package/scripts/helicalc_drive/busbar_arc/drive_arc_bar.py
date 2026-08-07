@@ -1,6 +1,10 @@
 import subprocess
 import argparse
 from math import ceil
+import torch as tc
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 from helicalc_utilities.constants import dxyz_arc_bar_dict, TSd_grid, DS_grid
 from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
 
@@ -61,21 +65,41 @@ if __name__=='__main__':
     else:
         args.dxyz_Jacobian = args.dxyz_Jacobian.strip()
     dxyz = args.dxyz_Jacobian
+    
     if args.Testing is None:
         args.Testing = 'n'
     else:
         args.Testing = args.Testing.strip()
     Test = args.Testing
 
-    print(f'Running on GPU: {Dev}')
-    for i in arc_bar_GPU_dict[Dev]:
-        if i < len(df_arc):
-            df_cn = df_arc.iloc[i]
-        else:
-            df_cn = df_arc_transfer.iloc[i-len(df_arc)]
-        cn = df_cn['cond N']
-        append = '' if args.infile is None else f' -i {args.infile}'
-        print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
-        _ = subprocess.run(f'python calculate_single_arc_bar_grid.py'+
-                           f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
-                           capture_output=False)
+    gpu_count = tc.cuda.device_count()
+    gpu_shift = int(round(4/gpu_count,0))
+    for run in range(gpu_shift):
+        coil_list = arc_bar_GPU_dict[run]
+        print(f'Run {run+1}: Running coil group {run} on GPU {Dev}')
+        # print(f'Running on GPU: {Dev}')
+        for i in coil_list:
+            if i < len(df_arc):
+                df_cn = df_arc.iloc[i]
+            else:
+                df_cn = df_arc_transfer.iloc[i-len(df_arc)]
+            cn = df_cn['cond N']
+            append = '' if args.infile is None else f' -i {args.infile}'
+            print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
+            _ = subprocess.run(f'python calculate_single_arc_bar_grid.py'+
+                            f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+                            capture_output=False)
+        print("\n")
+
+    # print(f'Running on GPU: {Dev}')
+    # for i in arc_bar_GPU_dict[Dev]:
+    #     if i < len(df_arc):
+    #         df_cn = df_arc.iloc[i]
+    #     else:
+    #         df_cn = df_arc_transfer.iloc[i-len(df_arc)]
+    #     cn = df_cn['cond N']
+    #     append = '' if args.infile is None else f' -i {args.infile}'
+    #     print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
+    #     _ = subprocess.run(f'python calculate_single_arc_bar_grid.py'+
+    #                         f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+    #                         capture_output=False)
