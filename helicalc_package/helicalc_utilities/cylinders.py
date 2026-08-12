@@ -2,8 +2,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import plotly.graph_objects as go
 
-from helicalc import helicalc_dir
-from helicalc.geometry import read_solenoid_geom_combined
+from helicalc_utilities import helicalc_dir
+from helicalc_utilities.geometry import read_solenoid_geom_combined
 
 def cylinder(r, h, xc=0, yc=0, zc=0, pitch=0., yaw=0., roll=0., nt=100, nv=50, flip_angles=False):
     # generate grid of theta, z (or v for vertical)

@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.tools import generate_cartesian_grid_df
-from helicalc.constants import dxyz_dict, dxyz_dict_coarse, DS_grid
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.tools import generate_cartesian_grid_df
+from helicalc_utilities.constants import dxyz_dict, dxyz_dict_coarse, DS_grid
 
 # which coil number?
 # Coil_Num = 56 # type 1 (long double layer)

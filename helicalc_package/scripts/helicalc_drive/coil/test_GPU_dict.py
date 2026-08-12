@@ -5,7 +5,7 @@ import subprocess
 #from helicalc.coil import CoilIntegrator
 #from helicalc.geometry import read_solenoid_geom_combined
 #from helicalc.tools import generate_cartesian_grid_df
-from helicalc.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
+from helicalc_utilities.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
 
 # data
 #datadir = helicalc_data+'Bmaps/helicalc_partial/'

@@ -1,8 +1,8 @@
 import sys
 import numpy as np
 import pandas as pd
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
 from tqdm import tqdm
 
 # output info

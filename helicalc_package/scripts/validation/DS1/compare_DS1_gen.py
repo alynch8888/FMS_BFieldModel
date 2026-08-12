@@ -1,12 +1,12 @@
 import sys
 import numpy as np
 import pandas as pd
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.busbar import ArcIntegrator3D
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.solenoid_geom_funcs import load_all_geoms
-from helicalc.constants import dxyz_dict, dxyz_arc_bar_dict
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.busbar import ArcIntegrator3D
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
+from helicalc_utilities.constants import dxyz_dict, dxyz_arc_bar_dict
 from tqdm import tqdm
 
 # output info

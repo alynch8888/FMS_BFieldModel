@@ -5,18 +5,22 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm import tqdm
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.tools import (
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.tools import (
     generate_cartesian_grid_df,
     generate_cylindrical_grid_df,
     add_points_for_J
 )
-from helicalc.constants import (
+from helicalc_utilities.constants import (
     dxyz_dict,
     TSd_grid,
     DS_grid,
+    Cole_val_grid,
     DS_Tracker_grid,
     DS_FMS_cyl_grid,
     DS_FMS_cyl_grid_SP,
@@ -38,6 +42,7 @@ df_chunks = pd.read_csv(chunk_file)
 
 regions = {'TSd': TSd_grid, 'DS': DS_grid,
            'DSTracker': DS_Tracker_grid,
+           'ColeVal': Cole_val_grid,
            'DSCylFMS': DS_FMS_cyl_grid,
            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine,
            'DSCartVal': DSCartVal_grid}

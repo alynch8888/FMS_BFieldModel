@@ -4,25 +4,30 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import argparse
+import torch as tc
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 from tqdm import tqdm
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.busbar import ArcIntegrator3D
-from helicalc.tools import (
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.busbar import ArcIntegrator3D
+from helicalc_utilities.tools import (
     generate_cartesian_grid_df,
     generate_cylindrical_grid_df,
     add_points_for_J
 )
-from helicalc.constants import (
+from helicalc_utilities.constants import (
     dxyz_arc_bar_dict,
     TSd_grid,
     DS_grid,
     DS_Tracker_grid,
+    Cole_val_grid,
     DS_FMS_cyl_grid,
     DS_FMS_cyl_grid_SP,
     DS_cyl_grid_fine,
     DSCartVal_grid
 )
-from helicalc.solenoid_geom_funcs import load_all_geoms
+from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
 
 # data
 datadir = helicalc_data+'Bmaps/helicalc_partial/'
@@ -39,6 +44,7 @@ N_per_chunk = 10000
 
 regions = {'TSd': TSd_grid, 'DS': DS_grid,
            'DSTracker': DS_Tracker_grid,
+           'ColeVal': Cole_val_grid,
            'DSCylFMS': DS_FMS_cyl_grid,
            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine, 'DSCartVal': DSCartVal_grid}
 
@@ -78,7 +84,8 @@ if __name__=='__main__':
     # kludge to add "_il" to "cond N"
     #(to not confuse with other arc segment column names)
     df_cond['cond N'] = f'{int(df_cond["cond N"])}_il'
-
+    print(df_cond.dtype)
+    
     R = df_cond.R0
     # pick correct integration grid based on which SC cross section
     if df_cond['T'] < 7e-3:

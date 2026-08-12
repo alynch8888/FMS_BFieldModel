@@ -15,20 +15,32 @@ from scipy.stats import norm
 from scipy.optimize import curve_fit
 from datetime import date
 from FMS_BFieldModel.AL_BField_Analysis.Scripts_setup.utils.utils import load_pkl, sum_field_maps, shift_x, print_xyz_coord, coord_shift, actual_shift, prep_group, save_summed_txt, find_xyz_mismatches
-#Useful names that can be used elsewhere
+
 today = date.today()
 
-##Paths (same as Make_txt_files)##
+##Paths##
 helicalc_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/Bmaps/helicalc_partial"
 solcalc_path  = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/Bmaps/SolCalc_partial"
 
 region_name = input("What is the region name for the files you are summing? ")
 m_to_mm = input("Do you want to change from m to mm?(y/n) ").strip().lower() == 'y'
-T_to_G = input("Do you want to change from Tesla to Gauss?(y/n) ").strip().lower() == 'y'
+T_to_G  = input("Do you want to change from Tesla to Gauss?(y/n) ").strip().lower() == 'y'
 
-##Find files in helicalc_partial and SolCalc_partial whose filename contains region_name##
-helicalc_region_files = [
-    f for f in glob.glob(os.path.join(helicalc_path, "*.pkl"))
+##Find files##
+busbar_arc_region_files = [
+    f for f in glob.glob(os.path.join(helicalc_path, "*arc.pkl"))
+    if region_name in os.path.basename(f)
+]
+busbar_straight_region_files = [
+    f for f in glob.glob(os.path.join(helicalc_path, "*straight.pkl"))
+    if region_name in os.path.basename(f)
+]
+interlayer_region_files = [
+    f for f in glob.glob(os.path.join(helicalc_path, "*_interlayer*.pkl"))
+    if region_name in os.path.basename(f)
+]
+layers_region_files = [
+    f for f in glob.glob(os.path.join(helicalc_path, "*_layer_*.pkl"))
     if region_name in os.path.basename(f)
 ]
 solcalc_region_files = [
@@ -36,61 +48,69 @@ solcalc_region_files = [
     if region_name in os.path.basename(f)
 ]
 
-print(f"Found {len(helicalc_region_files)} helicalc files matching '{region_name}'")
-print(f"Found {len(solcalc_region_files)} solcalc files matching '{region_name}'")
+print(f"Individual helicalc files matching '{region_name}':")
+print(f"  Busbar Arc:      {len(busbar_arc_region_files)}")
+print(f"  Busbar Straight: {len(busbar_straight_region_files)}")
+print(f"  Interlayer:      {len(interlayer_region_files)}")
+print(f"  Coil Layers:     {len(layers_region_files)}")
+print(f"  SolCalc:         {len(solcalc_region_files)}")
 
-if not helicalc_region_files:
-    print(f"Warning: no helicalc files matched '{region_name}' — skipping helicalc sum.")
+if not any([busbar_arc_region_files, busbar_straight_region_files,
+            interlayer_region_files, layers_region_files]):
+    print(f"Warning: no helicalc files matched '{region_name}'.")
 if not solcalc_region_files:
-    print(f"Warning: no solcalc files matched '{region_name}' — skipping solcalc sum.")
-
-
-
-##########Save the summed pkl as a tab-delimited txt, truncated to `digits` decimals,##########
+    print(f"Warning: no solcalc files matched '{region_name}'.")
 
 ##Check XYZ alignment (and shift if needed) before summing each group##
-if helicalc_region_files:
-    helicalc_region_files = prep_group(helicalc_region_files, "helicalc")
-
+print("Checking if XYZ coordinates match...\n")
+if busbar_arc_region_files:
+    busbar_arc_region_files = prep_group(busbar_arc_region_files, "busbar_arc")
+if busbar_straight_region_files:
+    busbar_straight_region_files = prep_group(busbar_straight_region_files, "busbar_straight")
+if interlayer_region_files:
+    interlayer_region_files = prep_group(interlayer_region_files, "interlayer")
+if layers_region_files:
+    layers_region_files = prep_group(layers_region_files, "layers")
 if solcalc_region_files:
     solcalc_region_files = prep_group(solcalc_region_files, "solcalc")
+print("\n")
 
 file_output_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_file/Summed_Files/"
+pkl_output_path = os.path.join(file_output_path, "pkl_files/")
+txt_output_path = os.path.join(file_output_path, "txt_files/")
+os.makedirs(pkl_output_path, exist_ok=True)
+os.makedirs(txt_output_path, exist_ok=True)
 
-##Sum and save, named after region_name##
-if helicalc_region_files:
-    sum_field_maps(
-        fileoutput_path=file_output_path,#helicalc_path,
-        filename=f"helicalcSummed_{region_name}",
-        pklarray=helicalc_region_files
-    )
-    # print("Changing m to mm and Tesla to Gauss...")
-    save_summed_txt(
-        os.path.join(file_output_path, f"helicalcSummed_{region_name}.pkl"),
-        os.path.join(file_output_path, f"helicalcSummed_{region_name}.txt"),
-        convert_m_to_mm=m_to_mm,
-        convert_T_to_G=T_to_G,
-    )
+map_files = [
+    f"busbar_arc_Summed_{region_name}",
+    f"busbar_straight_Summed_{region_name}",
+    f"interlayerSummed_{region_name}",
+    f"Coils_Summed_{region_name}",
+    f"SolCalc_Summed_{region_name}",
+]
+region_file_lists = [
+    busbar_arc_region_files,
+    busbar_straight_region_files,
+    interlayer_region_files,
+    layers_region_files,
+    solcalc_region_files,
+]
 
-if solcalc_region_files:
-    sum_field_maps(
-        fileoutput_path=file_output_path,#solcalc_path,
-        filename=f"SolCalcSummed_{region_name}",
-        pklarray=solcalc_region_files
-    )
-    # print("Changing m to mm and Tesla to Gauss...")
-    save_summed_txt(
-        os.path.join(file_output_path, f"SolCalcSummed_{region_name}.pkl"),
-        os.path.join(file_output_path, f"SolCalcSummed_{region_name}.txt"),
-        convert_m_to_mm=m_to_mm,
-        convert_T_to_G=T_to_G,
-    )
+##Sum and save each sub-category##
+for filename, file_list in zip(map_files, region_file_lists):
+    if file_list:
+        sum_field_maps(pkl_output_path=pkl_output_path, txt_output_path=txt_output_path, filename=filename, pklarray=file_list)
+        save_summed_txt(
+            os.path.join(pkl_output_path, f"{filename}.pkl"),
+            os.path.join(txt_output_path, f"{filename}.txt"),
+            convert_m_to_mm=m_to_mm,
+            convert_T_to_G=T_to_G,
+        )
+        print('\n')
 
-
-# Call after definition — combine the two summed outputs into one file
+##Combine all into {Region}_Summed##
 combined_inputs = [
-    os.path.join(file_output_path, f"helicalcSummed_{region_name}.pkl"),
-    os.path.join(file_output_path, f"SolCalcSummed_{region_name}.pkl"),
+    os.path.join(pkl_output_path, f"{f}.pkl") for f in map_files
 ]
 
 missing = [f for f in combined_inputs if not os.path.exists(f)]
@@ -99,16 +119,11 @@ if missing:
     for f in missing:
         print(f"  {f}")
 else:
-    sum_field_maps(file_output_path, "DS_Summed", combined_inputs)
-    # if m_to_mm and T_to_G == 'y':
-    #     print("Changing m to mm and Tesla to Gauss...")
-    # elif m_to_mm =='y' and T_to_G == 'n':
-    #     print("Changed m to mm")
-    # elif m_to_mm == 'n' and T_to_G == 'y':
-    #     print("Changed Tesla to Gauss")
+    sum_field_maps(pkl_output_path=pkl_output_path, txt_output_path=txt_output_path, filename = f"{region_name}_Summed", pklarray = combined_inputs)
     save_summed_txt(
-        os.path.join(file_output_path, "DS_Summed.pkl"),
-        os.path.join(file_output_path, "DS_Summed.txt"),
-        convert_m_to_mm= False,
-        convert_T_to_G= False,
+        os.path.join(pkl_output_path, f"{region_name}_Summed.pkl"),
+        os.path.join(txt_output_path, f"{region_name}_Summed.txt"),
+        convert_m_to_mm=False,
+        convert_T_to_G=False,
     )
+    print('\n')

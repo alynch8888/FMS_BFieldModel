@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import sys
+import time
+import subprocess
 #From import
 from scipy.stats import norm
 from scipy.optimize import curve_fit
@@ -37,7 +39,7 @@ def print_xyz_coord(filepath):
         print(f" {col}: {df[col].min()} to {df[col].max()}")
 
 ##########Sum Field Maps########## Does not drop R,Phi, BR, and BPhi
-def sum_field_maps(filepath,filename,pklarray):
+def sum_field_maps_Keeps_R_phi_Bphi(filepath,filename,pklarray):
     coord_cols = ['X', 'Y', 'Z']
     field_cols = ['Bx', 'By', 'Bz']
 
@@ -141,13 +143,13 @@ def shift_x(filepath, filename, coord_shift):
     print(f"Saved to {output_path}")
 
 ##########Sum Field Maps (Drops R, Phi, Br, and Bphi; keeps X, Y, Z, Bx, By, Bz)##########
-def sum_field_maps(fileoutput_path, filename, pklarray):
+def sum_field_maps(pkl_output_path, txt_output_path, filename, pklarray):
     coord_cols = ['X', 'Y', 'Z']
     field_cols = ['Bx', 'By', 'Bz']
     keep_cols = coord_cols + field_cols  # ['X', 'Y', 'Z', 'Bx', 'By', 'Bz']
 
-    output_pkl = os.path.join(fileoutput_path, filename + ".pkl")
-    output_csv = os.path.join(fileoutput_path, filename + ".txt")
+    output_pkl = os.path.join(pkl_output_path, filename + ".pkl")
+    output_csv = os.path.join(txt_output_path, filename + ".txt")
 
     result = None
     for fpath in pklarray:
@@ -275,38 +277,54 @@ def save_summed_txt(pkl_path, txt_path, convert_m_to_mm=False, convert_T_to_G=Fa
 
     df = load_pkl(pkl_path).copy()
 
-    if convert_m_to_mm and convert_T_to_G == 'y':
+    if convert_m_to_mm and convert_T_to_G:
         print("Changing m to mm and Tesla to Gauss...")
+        # new_coord_cols = ['X(mm)', 'Y(mm)', 'Z(mm)']
+        # new_field_cols = ['Bx(G)', 'By(G)', 'Bz(G)']
     elif convert_m_to_mm:
         print("Changing m to mm...")
+        # new_coord_cols = ['X(mm)', 'Y(mm)', 'Z(mm)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
     elif convert_T_to_G:
         print("Changing Tesla to Gauss...")
+        # new_coord_cols = ['X(m)', 'Y(m)', 'Z(m)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
+    # else:
+        # new_coord_cols = ['X(m)', 'Y(m)', 'Z(m)']
+        # new_field_cols = ['Bx(T)', 'By(T)', 'Bz(T)']
 
-    if convert_m_to_mm == True:
+    if convert_m_to_mm:
         for col in coord_cols:
-            df[col] = df[col] * 1000
-    elif convert_m_to_mm == False:
-        for col in coord_cols:
-            df[col] = df[col] * 1
-
-    if convert_T_to_G == True:
+            df[col] = df[col] * 1e3 #1m=1e3mm
+    if convert_T_to_G:
         for col in field_cols:
-            df[col] = df[col] * 10000
-    elif convert_T_to_G == False:
-        for col in coord_cols:
-            df[col] = df[col] * 1
+            df[col] = df[col] * 1e4 #1e4G=1T
+
+    # df.rename(columns=dict(zip(coord_cols + field_cols)), inplace=True)
 
     if convert_m_to_mm or convert_T_to_G:
         with open(pkl_path, "wb") as f:
             pickle.dump(df, f)
-        print(f"Updated units and re-saved {pkl_path}")
+        print(f"Updated units and re-saved: \nSaved to {pkl_path}")
 
-    factor = 10 ** digits
+    coord_digits = 3   # e.g. 3 decimal places for mm
+    field_digits = 12  # more precision for field values
+    coord_factor = 10 ** coord_digits
+    field_factor = 10 ** field_digits
     txt_df = df.copy()
-    for col in coord_cols + field_cols:
-        txt_df[col] = np.trunc(txt_df[col] * factor) / factor
+    for col in coord_cols:
+        txt_df[col] = np.trunc(txt_df[col] * coord_factor) / coord_factor
+    for col in field_cols:
+        txt_df[col] = np.trunc(txt_df[col] * field_factor) / field_factor
 
-    txt_df.to_csv(txt_path, sep='\t', index=False, float_format=f'%.{digits}f')
+    coord_unit = 'mm' if convert_m_to_mm else 'm'
+    field_unit = 'G' if convert_T_to_G else 'T'
+    units = [coord_unit] * 3 + [field_unit] * 3
+
+    with open(txt_path, 'w') as f:
+        f.write('\t'.join(units) + '\n')
+        f.write('\t'.join(coord_cols + field_cols) + '\n')
+        txt_df.to_csv(f, sep='\t', index=False, header=False, float_format=f'%.{digits}f')
     print(f"Saved to {txt_path}")
 
 ##########Check if X, Y, Z are the same across a list of files##########
@@ -322,3 +340,95 @@ def find_xyz_mismatches(filepaths):
             mismatched.append(fpath)
 
     return mismatched, ref_path
+##Cr##
+def countdown():
+    count = 3
+    while count > 0:
+        print(f"{count} ", end='', flush=True)
+        time.sleep(1)
+        count -= 1
+    print("Exiting the script...")
+    time.sleep(0.5)
+    os.system('clear')
+
+def navigate(directory, text, file_mask):
+    while True:
+        entries = sorted(os.listdir(directory))
+        folders = [e for e in entries if os.path.isdir(os.path.join(directory, e))]
+        file_mask = file_mask
+        if file_mask == "":
+            files   = [e for e in entries if os.path.isfile(os.path.join(directory, e))]
+        else:
+            files   = [e for e in entries if os.path.isfile(os.path.join(directory, e)) and e.endswith(file_mask)]
+        items   = folders + files
+
+        if not items:
+            print(f"No folders or files found in: {directory}")
+            return
+        print(f"\nCurrent directory: {directory}\n")
+        print(f"Let's grab the file you want to use {text}")
+        print("------------------------------------------")
+        for i, item in enumerate(items):
+            tag = "[DIR] " if os.path.isdir(os.path.join(directory, item)) else "[FILE]"
+            print(f"{i+1}. {tag} {item}")
+
+        print("---------------------------------------------------------------")
+        user_input = input("Enter the option number, 'q' for quick exit, or 'exit' to quit: ").strip()
+
+        if user_input == 'exit':
+            countdown()
+            return
+        elif user_input.lower() == 'q':
+            os.system('clear')
+            print("Quick exit. Bye!")
+            return
+        elif user_input.isdigit():
+            num_input = int(user_input)
+            if 1 <= num_input <= len(items):
+                selected_path = os.path.join(directory, items[num_input - 1])
+                if os.path.isdir(selected_path):
+                    directory = selected_path
+                else:
+                    selected_path_name = os.path.splitext(os.path.basename(selected_path))[0]
+                    return selected_path, selected_path_name
+            else:
+                print("Invalid option. Please enter a valid number.")
+        else:
+            print("Invalid input. Please enter a valid number, 'q' for quick exit, or 'exit' to quit.")
+
+##Loads a field map from a .pkl file, then delimits it based on CVMFS-styled grid.
+
+def load_field_map(path):
+    """Load a field map from a .pkl, a CVMFS-style grid text file (with '#'/param/grid
+    header lines followed by a bare 'data' marker line), or a plain delimited text file."""
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.pkl':
+        return load_pkl(path)
+
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    # CVMFS-style grid file: "# Origin shift...", "param ...", "grid X0=...", then a
+    # line that is just "data", then raw X Y Z Bx By Bz rows with no column header.
+    data_start = None
+    for i, line in enumerate(lines):
+        if line.strip().lower() == 'data':
+            data_start = i + 1
+            break
+
+    if data_start is not None:
+        return pd.read_csv(
+            path, sep=r'\s+', header=None, skiprows=data_start,
+            names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz']
+        )
+
+    # Fallback: plain delimited text, try with a header row first
+    df = pd.read_csv(path, sep=r'\s+', comment='#')
+    if not {'X', 'Y', 'Z'}.issubset(df.columns):
+        # No usable header row — re-read with no header and assign columns by position
+        df = pd.read_csv(path, sep=r'\s+', comment='#', header=None)
+        cols = df.columns.tolist()
+        cols[0], cols[1], cols[2] = 'X', 'Y', 'Z'
+        cols[3], cols[4], cols[5] = 'Bx', 'By', 'Bz'
+        df.columns = cols
+    return df

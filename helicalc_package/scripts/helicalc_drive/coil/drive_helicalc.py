@@ -1,6 +1,10 @@
 import subprocess
 import argparse
-from helicalc.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
+import torch as tc
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+from helicalc_utilities.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
 
 if __name__=='__main__':
     # parse command line arguments
@@ -22,26 +26,31 @@ if __name__=='__main__':
     parser.add_argument('-i', '--infile', help='pickle file with coordinate grid')
     args = parser.parse_args()
     # fill defaults if necessary
+
     if args.Region is None:
         args.Region = 'DS'
     else:
         args.Region = args.Region.strip()
     reg = args.Region
+
     if args.Device is None:
         args.Device = 0
     else:
         args.Device = int(args.Device.strip())
     Dev = args.Device
+
     if args.Jacobian is None:
         args.Jacobian = 'n'
     else:
         args.Jacobian = args.Jacobian.strip()
     Jac = args.Jacobian
+
     if args.dxyz_Jacobian is None:
         args.dxyz_Jacobian = '0.001'
     else:
         args.dxyz_Jacobian = args.dxyz_Jacobian.strip()
     dxyz = args.dxyz_Jacobian
+
     if args.Testing is None:
         args.Testing = 'n'
     else:
@@ -50,10 +59,40 @@ if __name__=='__main__':
     # if Test == 'y':
     #     reg = 'DS'
 
-    print(f'Running on GPU: {Dev}')
-    for info in helicalc_GPU_dict[Dev]:
-        append = '' if args.infile is None else f' -i {args.infile}'
-        print(f'Calculating: {info}')
-        _ = subprocess.run(f'python calculate_single_coil_grid.py -r {reg} -C {info["coil"]}'+
-                           f' -L {info["layer"]} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
-                           capture_output=False)
+
+    
+
+    # gpu_type = input("Are you using a single GPU or multiple GPUs? (s/m): ")
+    gpu_count = tc.cuda.device_count()
+    gpu_shift = int(round(4/gpu_count,0))
+    for run in range(gpu_shift):
+        coil_list = helicalc_GPU_dict[run]
+        print(f'Run {run+1}: Running coil group {run} on GPU {Dev}')
+        for info in coil_list:
+            append = '' if args.infile is None else f' -i {args.infile}'
+            print(f'Calculating: {info}')
+            _ = subprocess.run(f'python calculate_single_coil_grid.py -r {reg} -C {info["coil"]}'+
+                               f' -L {info["layer"]} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append,
+                               shell=True, capture_output=False)
+    # if gpu_type == 's':
+    #     Dev = tc.cuda.current_device()
+    #     gpu_count = tc.cuda.device_count()
+    #     gpu_shift = int(round(4/gpu_count,0))
+    #     for run in range(gpu_shift):
+    #         coil_list = helicalc_GPU_dict[run]
+    #         print(f'Run {run+1}: Running coil group {run} on GPU {Dev}')
+
+    #         for info in coil_list:
+    #             append = '' if args.infile is None else f' -i {args.infile}'
+    #             print(f'Calculating: {info}')
+    #             _ = subprocess.run(f'python calculate_single_coil_grid.py -r {reg} -C {info["coil"]}'+
+    #                             f' -L {info["layer"]} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append,
+    #                             shell=True, capture_output=False)
+    # elif gpu_type == 'm':
+    #     print(f'Running on GPU: {Dev}')
+    #     for info in helicalc_GPU_dict[Dev]:
+    #         append = '' if args.infile is None else f' -i {args.infile}'
+    #         print(f'Calculating: {info}')
+    #         _ = subprocess.run(f'python calculate_single_coil_grid.py -r {reg} -C {info["coil"]}'+
+    #                         f' -L {info["layer"]} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+    #                         capture_output=False)

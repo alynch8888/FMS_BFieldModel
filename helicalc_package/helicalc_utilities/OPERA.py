@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from scipy.spatial.transform import Rotation
-from helicalc import helicalc_dir
+from helicalc_utilities import helicalc_dir
 
 class Bricks(object):
     def __init__(self, filedir=helicalc_dir+'dev/params/OPERA/', filename='DS8_helix_V13.cond'):

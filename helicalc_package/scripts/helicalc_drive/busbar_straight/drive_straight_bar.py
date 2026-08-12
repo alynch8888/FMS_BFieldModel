@@ -1,7 +1,12 @@
 import subprocess
 import argparse
-from helicalc.constants import dxyz_straight_bar_dict, TSd_grid, DS_grid
-from helicalc.solenoid_geom_funcs import load_all_geoms
+from math import ceil
+import torch as tc
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+from helicalc_utilities.constants import dxyz_straight_bar_dict, TSd_grid, DS_grid
+from helicalc_utilities.solenoid_geom_funcs import load_all_geoms
 
 # load straight bus bars, dump all other geometries
 paramname = 'Mu2e_V13'
@@ -10,7 +15,8 @@ df_dict = load_all_geoms(version=version, return_dict=True)
 df_str = df_dict['straights']
 N_cond = len(df_str)
 # last GPU will get any extra conductors
-N_cond_per_GPU = int(N_cond // 4)
+# N_cond_per_GPU = int(N_cond // 4)
+N_cond_per_GPU = ceil(N_cond / 4)
 
 # evenly split, with remaining bars to GPU 3
 straight_bar_GPU_dict = {0: range(0, N_cond_per_GPU),
@@ -65,12 +71,29 @@ if __name__=='__main__':
         args.Testing = args.Testing.strip()
     Test = args.Testing
 
-    print(f'Running on GPU: {Dev}')
-    for i in straight_bar_GPU_dict[Dev]:
-        df_cn = df_str.iloc[i]
-        cn = df_cn['cond N']
-        append = '' if args.infile is None else f' -i {args.infile}'
-        print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
-        _ = subprocess.run(f'python calculate_single_straight_bar_grid.py'+
-                           f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
-                           capture_output=False)
+
+    gpu_count = tc.cuda.device_count()
+    gpu_shift = int(round(4/gpu_count,0))
+    for run in range(gpu_shift):
+        coil_list = straight_bar_GPU_dict[run]
+        print(f'Run {run+1}: Running coil group {run} on GPU {Dev}')
+        # print(f'Running on GPU: {Dev}')
+        for i in coil_list:
+            df_cn = df_str.iloc[i]
+            cn = df_cn['cond N']
+            append = '' if args.infile is None else f' -i {args.infile}'
+            print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
+            _ = subprocess.run(f'python calculate_single_straight_bar_grid.py'+
+                            f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+                            capture_output=False)
+        print("\n")
+
+    # print(f'Running on GPU: {Dev}')
+    # for i in straight_bar_GPU_dict[Dev]:
+    #     df_cn = df_str.iloc[i]
+    #     cn = df_cn['cond N']
+    #     append = '' if args.infile is None else f' -i {args.infile}'
+    #     print(f'Calculating {i}: cond N={cn}, info={df_cn["Name/role"]}')
+    #     _ = subprocess.run(f'python calculate_single_straight_bar_grid.py'+
+    #                        f' -r {reg} -C {cn} -D {Dev} -j {Jac} -d {dxyz} -t {Test}'+append, shell=True,
+    #                        capture_output=False)

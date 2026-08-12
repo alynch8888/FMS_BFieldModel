@@ -1,10 +1,10 @@
 import sys
 import numpy as np
 import pandas as pd
-from helicalc import helicalc_dir, helicalc_data
-from helicalc.coil import CoilIntegrator
-from helicalc.geometry import read_solenoid_geom_combined
-from helicalc.constants import dxyz_dict
+from helicalc_utilities import helicalc_dir, helicalc_data
+from helicalc_utilities.coil import CoilIntegrator
+from helicalc_utilities.geometry import read_solenoid_geom_combined
+from helicalc_utilities.constants import dxyz_dict
 from tqdm import tqdm
 
 # output info

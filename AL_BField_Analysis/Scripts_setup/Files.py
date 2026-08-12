@@ -22,7 +22,7 @@ data_pkl_array = [
     "PSMap.pkl"
 ]
 ##Helicalc pkl files##
-N_arc        = list(range(1,8,1))
+N_arc        = list(range(1,25,1))
 N_straight   = [12, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
 N_interlayer = [56, 57]#, 58]
 N_layer_1      = list(range(56,67,1))#[56, 60, 63]
