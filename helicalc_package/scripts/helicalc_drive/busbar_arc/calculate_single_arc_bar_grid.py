@@ -7,7 +7,7 @@ import argparse
 from tqdm import tqdm
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from helicalc_utilities import helicalc_dir, helicalc_data
 from helicalc_utilities.busbar import ArcIntegrator3D
 from helicalc_utilities.tools import (
@@ -20,6 +20,7 @@ from helicalc_utilities.constants import (
     TSd_grid,
     DS_grid,
     DS_Tracker_grid,
+    Cole_val_grid,
     DS_FMS_cyl_grid,
     DS_FMS_cyl_grid_SP,
     DS_cyl_grid_fine,
@@ -44,6 +45,7 @@ N_per_chunk = 1250
 
 regions = {'TSd': TSd_grid, 'DS': DS_grid,
            'DSTracker': DS_Tracker_grid,
+           'ColeVal': Cole_val_grid,
            'DSCylFMS': DS_FMS_cyl_grid,
            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP],
            'DSCylFine': DS_cyl_grid_fine,

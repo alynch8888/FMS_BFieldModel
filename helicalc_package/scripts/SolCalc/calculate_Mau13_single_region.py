@@ -4,6 +4,9 @@ from datetime import datetime
 import argparse
 import numpy as np
 import pandas as pd
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from helicalc_utilities import helicalc_dir, helicalc_data
 from helicalc_utilities.solcalc import *
 from helicalc_utilities.geometry import read_solenoid_geom_combined
@@ -18,6 +21,7 @@ from helicalc_utilities.constants import (
     TSd_grid,
     DS_grid,
     DS_Tracker_grid,
+    Cole_val_grid,
     PStoDumpArea_grid,
     ProtonDumpArea_grid,
     DS_cyl2d_grid_5mm,
@@ -35,6 +39,7 @@ datadir = helicalc_data+'Bmaps/SolCalc_partial/'
 
 regions = {'PS': PS_grid, 'TSu': TSu_grid, 'TSd': TSd_grid, 'DS': DS_grid,
            'DSTracker': DS_Tracker_grid,
+           'ColeVal': Cole_val_grid,
            'PStoDumpArea': PStoDumpArea_grid,
            'ProtonDumpArea': ProtonDumpArea_grid,
            'DSCyl2D': DS_cyl2d_grid_5mm,

@@ -4,7 +4,7 @@ import torch as tc
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
-from helicalc_package.helicalc_utilities.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
+from helicalc_utilities.constants import dxyz_dict, TSd_grid, DS_grid, helicalc_GPU_dict
 
 if __name__=='__main__':
     # parse command line arguments

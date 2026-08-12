@@ -19,6 +19,7 @@ from helicalc_utilities.constants import (
     dxyz_straight_bar_dict,
     TSd_grid,
     DS_grid,
+    Cole_val_grid,
     DS_Tracker_grid,
     DS_FMS_cyl_grid,
     DS_FMS_cyl_grid_SP,
@@ -41,6 +42,7 @@ N_per_chunk = 10000
 
 regions = {'TSd': TSd_grid, 'DS': DS_grid,
            'DSTracker': DS_Tracker_grid,
+           'ColeVal': Cole_val_grid,
            'DSCylFMS': DS_FMS_cyl_grid,
            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine, 'DSCartVal': DSCartVal_grid}
 
