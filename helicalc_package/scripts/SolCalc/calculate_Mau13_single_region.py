@@ -63,7 +63,7 @@ if __name__=='__main__':
                         'the Jacobian calculation? e.g. "0.001" (default)')
     parser.add_argument('-t', '--Testing',
                         help='Calculate using small subset of coils?'+
-                        '"y"(default)/"n"')
+                        '"y"/"n"(default)')
     parser.add_argument('-i', '--infile', help='pickle file with coordinate grid')
     parser.add_argument('-u', '--Unused',
                         help='Unused argument.')

@@ -13,9 +13,9 @@ from datetime import date
 #Useful names that can be used elsewhere
 today = date.today()
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
-from AL_BField_Analysis.Comp_Mine_Vs_CVMFS.Bfield_diff_compare import (comparison_file_name,
-                                                                       comparison_file_coord,
-                                                                       comparison_file_field,
+from AL_BField_Analysis.Comp_Mine_Vs_CVMFS.Bfield_diff_compare import (comparison_name,
+                                                                       comparison_coord,
+                                                                       comparison_field,
                                                                        mydata_name,
                                                                        mydata_field,
                                                                        field_diff,
@@ -55,7 +55,7 @@ for i, ax in enumerate(axes):
 axes[0].set_ylabel("Count")
 
 plt.tight_layout()
-vs_name = f"{mydata_name}_vs_{comparison_file_name}"
+vs_name = f"{mydata_name}_vs_{comparison_name}"
 if __name__ == "__main__":
     # Save figure
     script_dir = os.path.dirname(os.path.abspath(__file__))
