@@ -41,6 +41,12 @@ Cole_val_grid = {'X0':-4.854, 'Y0':-0.950, 'Z0':4.225,#'X0':-4.696, 'Y0':-0.800,
 DS_Cart_Val = {'X0':-4.854, 'Y0':-0.950, 'Z0':4.225,
            'nX':3, 'nY':3, 'nZ':3, #100,#'nX':65, 'nY':65, 'nZ':385,
            'dX':0.025, 'dY':0.025, 'dZ':0.025}
+Cold_Mass = {'X0':-5.096, 'Y0':0, 'Z0':3.071,
+           'nX':48, 'nY':48, 'nZ':521, #100,#'nX':65, 'nY':65, 'nZ':385,
+           'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
+Interchangable = {'X0':-5.096, 'Y0':0, 'Z0':4.225,
+           'nX':48, 'nY':48, 'nZ':48, #100,#'nX':65, 'nY':65, 'nZ':385,
+           'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
 # FMS big propeller measurements
 # using the values currently set up in Mu2E field fitting. But this was
 # defined based on Mau13 grid points, so we could adjust if needed.

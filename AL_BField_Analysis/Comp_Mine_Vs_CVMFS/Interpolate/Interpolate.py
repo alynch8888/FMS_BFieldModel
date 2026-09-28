@@ -12,7 +12,7 @@ import numpy as np
 
 #Start of actual code
 print("Running "+os.path.splitext(os.path.basename(__file__))[0]+"...\n") #This prints out the name of the script and the fact that it is running.
-
+filename = os.path.splitext(os.path.basename(__file__))[0]
 # interpolator_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_file/Summed_Files"
 # interpolatee_file_path ="/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data"
 

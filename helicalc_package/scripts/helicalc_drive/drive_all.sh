@@ -1,3 +1,16 @@
+mapfile -t regions < <(python -c "
+from coil.calculate_single_coil_grid import regions
+for r in regions:
+    print(r)
+")
+
+echo "Found ${#regions[@]} regions:"
+printf '  -%s\n' "${regions[@]}"
+
+# for r in "${regions[@]}"; do
+#     echo "Region: $r"
+# done
+
 read -p "What region are you running? " region
 # echo $region
 cd busbar_arc

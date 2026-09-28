@@ -76,7 +76,7 @@ vs_name = f"{mydata_name}_vs_{comparison_name}"
 if __name__ == "__main__":
     # Save figure
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    plot_dir = os.path.join(script_dir, "Comparison_Plots", vs_name, f"{today}")
+    plot_dir = os.path.join(script_dir, "Comparison_Plots", f"{today}", vs_name)
     os.makedirs(plot_dir, exist_ok=True)
     filename = f"Comp_dB_XYZ_{today}.png"
     fig.savefig(os.path.join(plot_dir, filename), bbox_inches='tight', dpi=150)

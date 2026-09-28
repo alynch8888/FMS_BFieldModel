@@ -22,6 +22,12 @@ from helicalc_utilities.constants import (
     DS_grid,
     DS_Tracker_grid,
     Cole_val_grid,
+    DS_Cart_Val,
+
+    Interchangable,
+    Cold_Mass,
+    Cole_val_grid,
+    
     DS_FMS_cyl_grid,
     DS_FMS_cyl_grid_SP,
     DS_cyl_grid_fine,
@@ -43,10 +49,13 @@ df_interlayer = df_dict['interlayers']
 N_per_chunk = 10000
 
 regions = {'TSd': TSd_grid, 'DS': DS_grid,
-           'DSTracker': DS_Tracker_grid,
-           'ColeVal': Cole_val_grid,
-           'DSCylFMS': DS_FMS_cyl_grid,
-           'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine, 'DSCartVal': DSCartVal_grid}
+            'DSTracker': DS_Tracker_grid,
+            'DSCartVal': DS_Cart_Val,
+            'ColeVal': Cole_val_grid,
+            'ColdMass': Cold_Mass,
+            'Interchange': Interchangable,
+            'DSCylFMS': DS_FMS_cyl_grid,
+            'DSCylFMSAll': [DS_FMS_cyl_grid, DS_FMS_cyl_grid_SP], 'DSCylFine': DS_cyl_grid_fine, 'DSCartVal': DSCartVal_grid}
 
 if __name__=='__main__':
     # parse command line arguments

@@ -38,6 +38,33 @@ def print_xyz_coord(filepath):
       for col in ['X','Y','Z']:
         print(f" {col}: {df[col].min()} to {df[col].max()}")
 
+##########Print the xyz coordinates from the txt files##########
+def print_xyz_coord_txt(filepath):
+    # print(Data_file)
+    for i, fpath in enumerate(filepath):
+        # PATCH: load_pkl(fpath) tried to unpickle these as binary .pkl
+        # files, but this function loads .txt data files -- same
+        # whitespace-delimited, 3-header-row format used elsewhere in this
+        # repo (see DS_Summed.txt / Comp_Bz_Vs_z.py). Swapped in the
+        # matching pd.read_csv call instead of load_pkl.
+        df = pd.read_csv(fpath, sep=r'\s+', skiprows=3, header=None,
+                          names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz'])
+        # print(i, df.shape)
+        print(f"\n{fpath}")
+        for col in ['X', 'Y', 'Z']:
+            # PATCH: some source files have a handful of non-numeric values
+            # sprinkled into a column (same issue Comp_Bz_Vs_z.py hit on
+            # DS_Summed.txt), which leaves that column as object dtype --
+            # a mix of real floats and leftover strings. df[col].min()/.max()
+            # then try to compare a str against a float and raise
+            # "'<=' not supported between instances of 'str' and 'float'".
+            # Coerce to numeric first so min/max only ever see floats.
+            numeric_col = pd.to_numeric(df[col], errors='coerce')
+            n_bad = numeric_col.isna().sum() - df[col].isna().sum()
+            if n_bad > 0:
+                print(f"   ({n_bad} non-numeric {col} value(s) ignored)")
+            print(f" {col}: {numeric_col.min()} to {numeric_col.max()}")
+
 ##########Sum Field Maps########## Does not drop R,Phi, BR, and BPhi
 def sum_field_maps_Keeps_R_phi_Bphi(filepath,filename,pklarray):
     coord_cols = ['X', 'Y', 'Z']
