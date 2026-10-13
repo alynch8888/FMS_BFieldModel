@@ -28,9 +28,9 @@ field_cols = ['Bx', 'By', 'Bz']
 #If your X coords were shifted (coord_shift/actual_shift) and you want them displayed un-shifted, set this.
 x_offset_for_display = 0  # e.g. 3896 to undo a -3.896 m shift when printing in mm
 
-data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/helicalc_package/data/"
+data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/"#helicalc_package"#/data/"
 
-Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
+Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/"#AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
 mydata_path = navigate(Summed_Files_path, "for your data \".pkl\" file?", ".pkl")
 mydata_name = os.path.splitext(os.path.basename(mydata_path[0]))[0]
 
@@ -41,7 +41,8 @@ if not os.path.isabs(mydata_path[0]):
 
 # comparison_path = f"{data_path}Cole_valMaps/Mu2e_V13_DSCartVal_Helicalc_All_Coils_All_Busbars.txt".strip()
 # comparison_name = os.path.splitext(os.path.basename(comparison_path))[0]
-comparison_file = navigate(data_path,"for your comparison \".pkl\" file?", ".pkl")
+comparison_file = navigate(data_path,"for your comparison \".pkl\" file?", "")
+print(comparison_file)
 comparison_path, comparison_name = comparison_file[0],comparison_file[1]
 
 mydata_df = load_field_map(mydata_path[0])[coord_cols + field_cols].copy()
@@ -68,6 +69,8 @@ merged = merged.dropna()
 print(f"\n{mydata_name} rows: {len(mydata_df)}")
 print(f"{comparison_name} rows:  {len(comparison_df)}")
 print(f"Matching rows (inner join on X,Y,Z): {len(merged)}\n")
+print(f"Matching Rows comp/merged ratio: {len(comparison_df)/len(mydata_df)}")
+print(f"Matching Rows merged/comp ratio: {len(mydata_df)/len(comparison_df)}")
 
 if merged.empty:
     print("No matching X, Y, Z coordinates between the two files — nothing to compare.")
@@ -131,7 +134,7 @@ if __name__ == "__main__":
             for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
                 print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
                 print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
-                print(f"CVMFS Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
+                print(f"Comparison Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
                 print(sep + "\n")
                 true_count += 1
             print(sep, f"\n|B| Field Trigger: {bf_trigger_min} < |B| < {bf_trigger_max}")

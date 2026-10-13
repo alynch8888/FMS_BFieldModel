@@ -41,6 +41,7 @@ def print_xyz_coord(filepath):
 ##########Print the xyz coordinates from the txt files##########
 def print_xyz_coord_txt(filepath):
     # print(Data_file)
+    filepath=[filepath]
     for i, fpath in enumerate(filepath):
         # PATCH: load_pkl(fpath) tried to unpickle these as binary .pkl
         # files, but this function loads .txt data files -- same

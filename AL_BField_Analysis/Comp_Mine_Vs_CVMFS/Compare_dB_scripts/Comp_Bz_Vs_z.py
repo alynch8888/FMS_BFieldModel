@@ -35,7 +35,7 @@ filename = os.path.splitext(os.path.basename(__file__))[0]
 # field_data = [field_diff[:, 0], field_diff[:, 1], field_diff[:, 2]]
 
 nav_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel"
-data_path = navigate(nav_path,"for the data you want to plot", ".txt")
+data_path = navigate(nav_path,"for the data you want to plot", "")#".txt")
 # data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_file/Summed_Files/DS_Summed.txt"
 data_df = pd.read_csv(data_path[0], sep=r'\s+', skiprows=3, header=None, names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz'])
 
@@ -69,6 +69,7 @@ Bz = data_df['Bz'].to_numpy()
 # PATCH: cast the typed-in values to float right away -- input() always
 # returns a string, and comparing a string against a numeric column either
 # errors (as it did) or silently never matches.
+print(type(data_path[0]), repr(data_path[0]))
 print_xyz_coord_txt([data_path[0]])
 xmask = float(input("X-Coordinate Mask in mm: "))
 ymask = float(input("Y-Coodinate Mask in mm: "))
