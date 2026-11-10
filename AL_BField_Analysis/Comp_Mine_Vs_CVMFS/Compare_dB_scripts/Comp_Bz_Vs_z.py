@@ -35,7 +35,7 @@ filename = os.path.splitext(os.path.basename(__file__))[0]
 # field_data = [field_diff[:, 0], field_diff[:, 1], field_diff[:, 2]]
 
 nav_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel"
-data_path = navigate(nav_path,"for the data you want to plot", "")#".txt")
+data_path = navigate(nav_path,"for the data you want to plot",".txt")
 # data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_file/Summed_Files/DS_Summed.txt"
 data_df = pd.read_csv(data_path[0], sep=r'\s+', skiprows=3, header=None, names=['X', 'Y', 'Z', 'Bx', 'By', 'Bz'])
 
@@ -70,69 +70,72 @@ Bz = data_df['Bz'].to_numpy()
 # returns a string, and comparing a string against a numeric column either
 # errors (as it did) or silently never matches.
 print(type(data_path[0]), repr(data_path[0]))
-print_xyz_coord_txt([data_path[0]])
-xmask = float(input("X-Coordinate Mask in mm: "))
-ymask = float(input("Y-Coodinate Mask in mm: "))
+print_xyz_coord_txt(data_path[0])
+while True:
+    xmask = float(input("X-Coordinate Mask in mm: "))
+    ymask = float(input("Y-Coodinate Mask in mm: "))
 
-# PATCH: build the xy slice off the *nearest available* grid point rather
-# than requiring an exact match. Real grid data almost never lands exactly
-# on the value you type in, and float rounding from the source file means
-# even "the same" coordinate can differ by a tiny amount row to row.
-nearest_x = x_coord[np.argmin(np.abs(x_coord - xmask))]
-nearest_y = y_coord[np.argmin(np.abs(y_coord - ymask))]
-if not np.isclose(nearest_x, xmask) or not np.isclose(nearest_y, ymask):
-    print(f"Note: exact X={xmask}, Y={ymask} not in the data; "
-          f"using nearest available X={nearest_x}, Y={nearest_y}.")
+    # PATCH: build the xy slice off the *nearest available* grid point rather
+    # than requiring an exact match. Real grid data almost never lands exactly
+    # on the value you type in, and float rounding from the source file means
+    # even "the same" coordinate can differ by a tiny amount row to row.
+    nearest_x = x_coord[np.argmin(np.abs(x_coord - xmask))]
+    nearest_y = y_coord[np.argmin(np.abs(y_coord - ymask))]
+    if not np.isclose(nearest_x, xmask) or not np.isclose(nearest_y, ymask):
+        print(f"Note: exact X={xmask}, Y={ymask} not in the data; "
+            f"using nearest available X={nearest_x}, Y={nearest_y}.")
 
-xy_mask = np.isclose(x_coord, nearest_x) & np.isclose(y_coord, nearest_y)
-if not xy_mask.any():
-    raise ValueError(f"No rows found for X={nearest_x}, Y={nearest_y}. Check the mask values.")
+    xy_mask = np.isclose(x_coord, nearest_x) & np.isclose(y_coord, nearest_y)
+    if not xy_mask.any():
+        raise ValueError(f"No rows found for X={nearest_x}, Y={nearest_y}. Check the mask values.")
 
-print(f"{xy_mask.sum()} rows matched at X={nearest_x}, Y={nearest_y}")
+    print(f"{xy_mask.sum()} rows matched at X={nearest_x}, Y={nearest_y}")
 
-# Sort by Z so the line plot below reads left-to-right instead of following
-# the file's original row order.
-order = np.argsort(z_coord[xy_mask])
-z_slice = z_coord[xy_mask][order]
-Bz_slice = Bz[xy_mask][order]
+    # Sort by Z so the line plot below reads left-to-right instead of following
+    # the file's original row order.
+    order = np.argsort(z_coord[xy_mask])
+    z_slice = z_coord[xy_mask][order]
+    Bz_slice = Bz[xy_mask][order]
 
-vs_name = r"Bz_vs_z"
-plt.style.use('dark_background')
-units = 'z(mm)', r'B_z(T)'
-
-
-
-# print(z_slice,Bz_slice)
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(z_slice, Bz_slice, color=colors[2], marker='o', markersize=3, linewidth=1.2, label=r"$B_z$")
-ax.set_xlabel("Z (mm)")
-ax.set_ylabel(r"$B_z$ (T)")
-data_file_name = os.path.basename(data_path[0])
-ax.set_title(f"$B_z$ vs $Z$ at X={nearest_x:.1f} mm, Y={nearest_y:.1f} mm\n{data_file_name}")
-ax.xaxis.set_major_locator(MaxNLocator(nbins=10))
-ax.legend()
-plt.tight_layout()
+    vs_name = r"Bz_vs_z"
+    plt.style.use('dark_background')
+    units = 'z(mm)', r'B_z(T)'
 
 
 
-if __name__ == "__main__":
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    plot_dir = os.path.join(script_dir, "Comparison_Plots", vs_name, f"{today}")
-    os.makedirs(plot_dir, exist_ok=True)
-    out_filename = f"{filename}_X{nearest_x:.0f}_Y{nearest_y:.0f}_{today}.png"
-    fig.savefig(os.path.join(plot_dir, out_filename), bbox_inches='tight', dpi=150)
-    print(f"Saved: {os.path.join(plot_dir, out_filename)}")
+    # print(z_slice,Bz_slice)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(z_slice, Bz_slice, color=colors[2], marker='o', markersize=3, linewidth=1.2, label=r"$B_z$")
+    plt.axvline(x = 8500, color = 'b', label = 'Start of Tracker')
+    plt.axvline(x = 11800, color = 'g', label = 'End of Tracker')#11.8m
+    ax.set_xlabel("Z (mm)")
+    ax.set_ylabel(r"$B_z$ (T)")
+    data_file_name = os.path.basename(data_path[0])
+    ax.set_title(f"$B_z$ vs $Z$ at X={nearest_x:.1f} mm, Y={nearest_y:.1f} mm\n{data_file_name}")
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=10))
+    ax.legend()
+    plt.tight_layout()
 
-plt.close(fig)
-txt_filename = f"{filename}_X{nearest_x:.0f}_Y{nearest_y:.0f}_{today}.txt"
-txt_path = plot_dir + "/" + txt_filename
-with open(txt_path, 'w') as f:
-        # f.write('\t'.join(units) + '\n')
-        f.write('\t'.join(['z(mm)','Bz(T)']) + '\n')
-        for row in zip(z_slice, Bz_slice):
-                f.write('\t'.join(str(x) for x in row) + '\n')
-        # f.write(os.path.join(plot_dir, txt_filename), bbox_inches='tight', dpi=150)
-print(f"Saved to {txt_path}")
+
+
+    if __name__ == "__main__":
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        plot_dir = os.path.join(script_dir, "Comparison_Plots", vs_name, f"{today}")
+        os.makedirs(plot_dir, exist_ok=True)
+        out_filename = f"{filename}_X{nearest_x:.0f}_Y{nearest_y:.0f}_{today}.png"
+        fig.savefig(os.path.join(plot_dir, out_filename), bbox_inches='tight', dpi=150)
+        print(f"Saved: {os.path.join(plot_dir, out_filename)}")
+
+    plt.close(fig)
+    txt_filename = f"{filename}_X{nearest_x:.0f}_Y{nearest_y:.0f}_{today}.txt"
+    txt_path = plot_dir + "/" + txt_filename
+    with open(txt_path, 'w') as f:
+            # f.write('\t'.join(units) + '\n')
+            f.write('\t'.join(['z(mm)','Bz(T)']) + '\n')
+            for row in zip(z_slice, Bz_slice):
+                    f.write('\t'.join(str(x) for x in row) + '\n')
+            # f.write(os.path.join(plot_dir, txt_filename), bbox_inches='tight', dpi=150)
+    print(f"Saved to {txt_path}")
 
 # zmask = data_df[:, 2]
 

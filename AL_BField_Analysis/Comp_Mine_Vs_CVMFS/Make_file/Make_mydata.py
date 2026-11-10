@@ -121,8 +121,8 @@ if missing:
 else:
     sum_field_maps(pkl_output_path=pkl_output_path, txt_output_path=txt_output_path, filename = f"{region_name}_Summed", pklarray = combined_inputs)
     save_summed_txt(
-        os.path.join(pkl_output_path, f"{region_name}_Summed.pkl"),
-        os.path.join(txt_output_path, f"{region_name}_Summed.txt"),
+        os.path.join(pkl_output_path, f"Summed_{region_name}.pkl"),#f"{region_name}_Summed.pkl"),
+        os.path.join(txt_output_path, f"Summed_{region_name}.txt"),#f"{region_name}_Summed.txt"),
         convert_m_to_mm=False,
         convert_T_to_G=False,
     )

@@ -41,11 +41,14 @@ Cole_val_grid = {'X0':-4.854, 'Y0':-0.950, 'Z0':4.225,#'X0':-4.696, 'Y0':-0.800,
 DS_Cart_Val = {'X0':-4.854, 'Y0':-0.950, 'Z0':4.225,
            'nX':3, 'nY':3, 'nZ':3, #100,#'nX':65, 'nY':65, 'nZ':385,
            'dX':0.025, 'dY':0.025, 'dZ':0.025}
-Cold_Mass = {'X0':-5.104, 'Y0':-3.350, 'Z0':6.950,#3.071,
-           'nX':120, 'nY':410, 'nZ':440,#356, #100,#'nX':65, 'nY':65, 'nZ':385,
+Cold_Mass = {'X0':-4.904, 'Y0':-0.5, 'Z0':6.950,#3.071,
+           'nX':25, 'nY':41, 'nZ':445,#'nX':120, 'nY':410, 'nZ':440,#356, #100,#'nX':65, 'nY':65, 'nZ':385,
            'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
-Interchangable = {'X0':-5.096, 'Y0':0, 'Z0':4.225,
-           'nX':48, 'nY':48, 'nZ':48, #100,#'nX':65, 'nY':65, 'nZ':385,
+# Interchangable = {'X0':-4.904, 'Y0':-0.250, 'Z0':6.950,
+#            'nX':13, 'nY':21, 'nZ':445,
+#            'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
+Interchangable = {'X0':-4.854, 'Y0':-0.550, 'Z0':6.950,
+           'nX':7, 'nY':17, 'nZ':445,
            'dX':0.0125, 'dY':0.0125, 'dZ':0.0125}
 # FMS big propeller measurements
 # using the values currently set up in Mu2E field fitting. But this was
@@ -105,7 +108,7 @@ dxyz_dict_coarse = {1: np.array([3e-3,1e-3, 5e-2/1.05]),
                     2: np.array([2e-3,1e-3, 5e-2/1.05])}
 # fine integration grid (3x3 in cross section, 1/(1cm) in R*phi)
 dxyz_dict = {1: np.array([3e-3,1e-3, 1e-2/1.05]),
-             2: np.array([2e-3,1e-3, 1e-2/1.05])}
+             2: np.array([2e-3,1e-3, 1e-2/1.05])}#Remember to change 2e-3 to 1e-2.
 
 # dictionary for which coils & layers on which GPU (for full run)
 # key is device, value is a list of dictionaries with coil + layer

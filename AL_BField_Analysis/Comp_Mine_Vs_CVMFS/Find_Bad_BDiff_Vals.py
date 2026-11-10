@@ -47,9 +47,9 @@ if mask1.any():
     true_count = 0
     test = 0
     for (x, y, z), err, (bx0,by0,bz0),(bx1,by1,bz1) in zip(coords, errors, mydata_field, cvmfs_field):
-        print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
-        print(f"CVFMS Field: Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
-        print(f"X: {x+3896:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}") 
+        print(f"MyData Field: Bx: {bx0:.10f} G, By: {by0:.10f} G, Bz: {bz0:.20f} G")
+        print(f"CVFMS Field: Bx: {bx1:.10f} G, By: {by1:.10f} G, Bz: {bz1:.10f} G")
+        print(f"X: {x+3896:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.10f}") 
         print(sep+"\n")
         true_count = true_count + 1
         test += 1

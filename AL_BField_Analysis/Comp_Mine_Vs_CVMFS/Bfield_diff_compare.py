@@ -29,9 +29,9 @@ field_cols = ['Bx', 'By', 'Bz']
 x_offset_for_display = 0  # e.g. 3896 to undo a -3.896 m shift when printing in mm
 
 data_path = "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/"#helicalc_package"#/data/"
-
-Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/"#AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
-mydata_path = navigate(Summed_Files_path, "for your data \".pkl\" file?", ".pkl")
+regionname = input("What region are you looking comparing?: ")
+Summed_Files_path =  "/mnt/c/Users/alecl/OneDrive/Documents/GitHub/FMS_BFieldModel/AL_BField_Analysis/Comp_Mine_Vs_CVMFS/Make_File/Summed_Files/pkl_files"
+mydata_path = navigate(Summed_Files_path, "for your data \".pkl\" file?", f"{regionname}.pkl")
 mydata_name = os.path.splitext(os.path.basename(mydata_path[0]))[0]
 
 
@@ -41,7 +41,7 @@ if not os.path.isabs(mydata_path[0]):
 
 # comparison_path = f"{data_path}Cole_valMaps/Mu2e_V13_DSCartVal_Helicalc_All_Coils_All_Busbars.txt".strip()
 # comparison_name = os.path.splitext(os.path.basename(comparison_path))[0]
-comparison_file = navigate(data_path,"for your comparison \".pkl\" file?", "")
+comparison_file = navigate(Summed_Files_path,"for your comparison \".pkl\" file?", "DSCartVal.pkl")
 print(comparison_file)
 comparison_path, comparison_name = comparison_file[0],comparison_file[1]
 
@@ -101,9 +101,9 @@ if __name__ == "__main__":
         bf_trigger_max = 0
         fe_bound_min = 0
         fe_bound_max = 0
-        print(f"Min BField(T): {round(np.min(mydata_field[:, 2]),4)}    Min FracErr: {round(np.min(field_error[2]),4)}")
-        print(f"Ave BField(T): {round(np.mean(mydata_field[:, 2]),4)}   Ave FracErr: {round(np.mean(field_error[2]),4)}")
-        print(f"Max BField(T): {round(np.max(mydata_field[:, 2]),4)}    Max FracErr: {round(np.max(field_error[2]),4)}")
+        print(f"Min BField(T): {round(np.min(mydata_field[:, 2]),4)}    Min FracErr: {(np.min(abs(field_error[2])))}")
+        print(f"Ave BField(T): {round(np.mean(mydata_field[:, 2]),4)}   Ave FracErr: {(np.mean(abs(field_error[2])))}")
+        print(f"Max BField(T): {round(np.max(mydata_field[:, 2]),4)}    Max FracErr: {(np.max(abs(field_error[2])))}")
         bf_trigger_min = input("\nWhat min Bfield(T) do you want to cutoff? (or 'q' to quit) ")
         if bf_trigger_min.strip().lower() == 'q':
             break
@@ -132,9 +132,9 @@ if __name__ == "__main__":
             cv_field = comparison_field[mask]
             true_count = 0
             for (x, y, z), err, (bx0, by0, bz0), (bx1, by1, bz1) in zip(coords, errors, my_field, cv_field):
-                print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.4f}")
-                print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.3f} G")
-                print(f"Comparison Field:  Bx: {bx1:.3f} G, By: {by1:.3f} G, Bz: {bz1:.3f} G")
+                print(f"Coords: X: {x + x_offset_for_display:.2f}mm  Y: {y:.2f}mm  Z: {z:.2f}mm | frac_error_Bz: {err:.10f}")
+                print(f"MyData Field: Bx: {bx0:.3f} G, By: {by0:.3f} G, Bz: {bz0:.10f} G")
+                print(f"Comparison Field:  Bx: {bx1:.10f} G, By: {by1:.10f} G, Bz: {bz1:.10f} G")
                 print(sep + "\n")
                 true_count += 1
             print(sep, f"\n|B| Field Trigger: {bf_trigger_min} < |B| < {bf_trigger_max}")
